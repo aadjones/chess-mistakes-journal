@@ -107,7 +107,7 @@ Always use real PGN data from Lichess, Chess.com, or other platforms. See [Devel
 
 - [x] Project setup with Next.js, Prisma, Tailwind
 - [x] PGN parser with full test coverage
-- [ ] FEN extractor with tests
+- [x] FEN extractor with tests
 - [ ] Data access layer (games, mistakes)
 - [ ] Game import UI and API
 - [ ] Mistake entry form

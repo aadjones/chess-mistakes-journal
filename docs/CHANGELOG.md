@@ -45,6 +45,13 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
   - Helper functions for player color, opponent rating, date extraction
   - **17/17 tests passing** with real game data
 
+- **FEN Extractor** (`lib/chess/fen-extractor.ts`)
+  - Extracts board position (FEN string) at any move number
+  - Leverages chess.js `.fen()` method (no wheel reinvention)
+  - Validates move numbers and provides clear error messages
+  - Returns starting FEN for move 0
+  - **13/13 tests passing** with comprehensive validation
+
 #### Documentation
 
 - `technical-architecture.md` - Comprehensive technical design
@@ -104,7 +111,7 @@ None
 
 ### Next Steps
 
-- [ ] Implement FEN extractor with tests
+- [x] Implement FEN extractor with tests
 - [ ] Implement move navigator with tests
 - [ ] Create data access layer (games, mistakes repositories)
 - [ ] Build game import API endpoint
