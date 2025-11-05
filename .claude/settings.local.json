@@ -21,7 +21,8 @@
       "Bash(npx lint-staged)",
       "Bash(git restore:*)",
       "Bash(git commit:*)",
-      "Bash(node test-chess-methods.js:*)"
+      "Bash(node test-chess-methods.js:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

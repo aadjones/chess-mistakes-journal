@@ -6,6 +6,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./__tests__/setup.ts'],
+    // Note: Database tests currently require sequential execution
+    // due to shared PrismaClient instances and beforeEach table recreation.
+    // For improved parallel testing, see __tests__/helpers/test-db.ts
+    fileParallelism: false,
+    sequence: {
+      hooks: 'stack',
+    },
   },
   resolve: {
     alias: {

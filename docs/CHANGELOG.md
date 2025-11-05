@@ -60,6 +60,14 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
   - Maintains Chess instance for efficient position tracking
   - **35/35 tests passing** covering all navigation scenarios
 
+- **Data Access Layer** (`lib/db/`)
+  - Repository pattern with dependency injection
+  - Games repository: CRUD operations for games
+  - Mistakes repository: CRUD operations with tag management
+  - Domain types separate from Prisma types (clean boundaries)
+  - **41/41 tests passing** using Prisma migrations for test schema
+  - Test helper (`__tests__/helpers/test-db.ts`) ensures schema consistency
+
 #### Documentation
 
 - `technical-architecture.md` - Comprehensive technical design
@@ -68,6 +76,10 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
   - Never hand-write PGN data (use real games only)
   - Tailwind CSS v3.4.x requirement (not v4)
   - Don't reinvent the wheel (use existing libraries)
+- `testing-strategy.md` - Database testing approach
+  - Use Prisma migrations for test schemas
+  - Isolated file-based databases per test suite
+  - Domain-driven repository pattern
 - `README.md` - Project overview and setup instructions
 - `CHANGELOG.md` - This file
 
@@ -122,7 +134,7 @@ None
 
 - [x] Implement FEN extractor with tests
 - [x] Implement move navigator with tests
-- [ ] Create data access layer (games, mistakes repositories)
+- [x] Create data access layer (games, mistakes repositories)
 - [ ] Build game import API endpoint
 - [ ] Build game import UI form
 - [ ] Build mistake entry form
