@@ -97,7 +97,7 @@ export default function NewGamePage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/mistakes')}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
           >
             Cancel

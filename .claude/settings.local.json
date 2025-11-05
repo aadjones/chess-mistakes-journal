@@ -29,7 +29,9 @@
       "Bash(npx tsc:*)",
       "Bash(test:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(npm ci:*)"
+      "Bash(npm ci:*)",
+      "Bash(xargs kill -9)",
+      "Bash(timeout 30 npx next build:*)"
     ],
     "deny": [],
     "ask": []

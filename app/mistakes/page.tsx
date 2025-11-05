@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
+import { formatTimeControl } from '@/lib/utils/format-time-control';
 import type { Mistake, Game } from '@prisma/client';
 
 type MistakeWithGame = Mistake & { game: Game };
@@ -104,22 +105,42 @@ export default function MistakesListPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <button onClick={() => router.push('/')} className="text-blue-600 hover:text-blue-800 mb-2">
-          ← Back to Home
-        </button>
         <h1 className="text-2xl font-bold mb-2">All Mistakes</h1>
         <p className="text-gray-600">{mistakes.length} mistakes recorded</p>
       </div>
 
       {mistakes.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-600 mb-4">No mistakes recorded yet.</p>
-          <button
-            onClick={() => router.push('/games/new')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Import Your First Game
-          </button>
+          <h2 className="text-xl font-semibold mb-2">No mistakes recorded yet</h2>
+          <p className="text-gray-600 mb-6">
+            Get started by importing a game and recording your first mistake.
+          </p>
+          <div className="space-y-4 max-w-md mx-auto text-left">
+            <div className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                1
+              </span>
+              <p className="text-sm text-gray-700">Click &quot;Import Game&quot; in the header</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                2
+              </span>
+              <p className="text-sm text-gray-700">Paste your PGN and select your color</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                3
+              </span>
+              <p className="text-sm text-gray-700">Navigate to a move where you made a mistake</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                4
+              </span>
+              <p className="text-sm text-gray-700">Record what went wrong and tag it</p>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -194,7 +215,8 @@ export default function MistakesListPage() {
                         {mistake.game.opponentRating
                           ? `${mistake.game.opponentRating}`
                           : 'opponent'}
-                        {mistake.game.timeControl && ` • ${mistake.game.timeControl}`}
+                        {mistake.game.timeControl &&
+                          ` • ${formatTimeControl(mistake.game.timeControl)}`}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         Recorded {new Date(mistake.createdAt).toLocaleDateString()}
@@ -209,12 +231,6 @@ export default function MistakesListPage() {
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                       >
                         View in Game
-                      </button>
-                      <button
-                        onClick={() => router.push(`/mistakes/${mistake.id}`)}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-                      >
-                        Full Details
                       </button>
                       <button
                         onClick={e => handleDelete(mistake.id, e)}

@@ -3,7 +3,7 @@ import { Chessboard } from 'react-chessboard';
 interface PlayerChessboardProps {
   position: string;
   playerColor: string;
-  options?: Record<string, unknown>;
+  customSquareStyles?: Record<string, React.CSSProperties>;
 }
 
 /**
@@ -11,14 +11,18 @@ interface PlayerChessboardProps {
  * Use this instead of the raw Chessboard component to ensure consistent
  * board orientation throughout the app.
  */
-export function PlayerChessboard({ position, playerColor, options = {} }: PlayerChessboardProps) {
+export function PlayerChessboard({
+  position,
+  playerColor,
+  customSquareStyles = {},
+}: PlayerChessboardProps) {
   return (
     <Chessboard
       options={{
         position,
         boardOrientation: playerColor === 'black' ? 'black' : 'white',
         allowDragging: false,
-        ...options,
+        squareStyles: customSquareStyles,
       }}
     />
   );
