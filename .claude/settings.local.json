@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npm test:*)",
+      "Bash(node -e:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run verify:*)",
+      "Bash(npx next:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

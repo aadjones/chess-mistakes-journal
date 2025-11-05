@@ -1,0 +1,42 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id              String    @id @default(cuid())
+  pgn             String
+  playerColor     String    // "white" or "black"
+  opponentRating  Int?
+  timeControl     String?
+  datePlayed      DateTime?
+  createdAt       DateTime  @default(now())
+
+  mistakes        Mistake[]
+
+  @@index([datePlayed])
+}
+
+model Mistake {
+  id                 String   @id @default(cuid())
+  gameId             String
+  game               Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  moveNumber         Int
+  fenPosition        String
+  briefDescription   String
+  primaryTag         String
+  detailedReflection String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([gameId])
+  @@index([primaryTag])
+  @@index([createdAt])
+}
