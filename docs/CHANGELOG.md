@@ -52,6 +52,14 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
   - Returns starting FEN for move 0
   - **13/13 tests passing** with comprehensive validation
 
+- **Move Navigator** (`lib/chess/move-navigator.ts`)
+  - Navigate forward/backward through game moves
+  - Jump to any move or start/end positions
+  - Query navigation state (isAtStart, isAtEnd, canGoForward, etc.)
+  - Leverages chess.js `.undo()` for backward navigation
+  - Maintains Chess instance for efficient position tracking
+  - **35/35 tests passing** covering all navigation scenarios
+
 #### Documentation
 
 - `technical-architecture.md` - Comprehensive technical design
@@ -59,6 +67,7 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
 - `development-rules.md` - Critical development guidelines
   - Never hand-write PGN data (use real games only)
   - Tailwind CSS v3.4.x requirement (not v4)
+  - Don't reinvent the wheel (use existing libraries)
 - `README.md` - Project overview and setup instructions
 - `CHANGELOG.md` - This file
 
@@ -112,7 +121,7 @@ None
 ### Next Steps
 
 - [x] Implement FEN extractor with tests
-- [ ] Implement move navigator with tests
+- [x] Implement move navigator with tests
 - [ ] Create data access layer (games, mistakes repositories)
 - [ ] Build game import API endpoint
 - [ ] Build game import UI form

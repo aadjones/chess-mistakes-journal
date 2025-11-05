@@ -48,6 +48,22 @@ module.exports = {
 
 ## Code Quality
 
+### Don't Reinvent the Wheel
+
+**Always check if existing libraries already solve the problem before implementing from scratch.**
+
+Examples:
+
+- ✅ Use `chess.js` `.fen()` method instead of building FEN generator
+- ✅ Use `chess.js` `.undo()` method for navigation instead of custom state tracking
+- ✅ Search npm/GitHub for established solutions to common problems
+
+Before implementing any non-trivial algorithm:
+
+1. Check if chess.js has it built-in
+2. Search for specialized libraries (e.g., chess analysis, opening databases)
+3. Only implement custom code if no suitable library exists
+
 ### PGN Data Integrity
 
 **NEVER** manually write or generate PGN game data.
