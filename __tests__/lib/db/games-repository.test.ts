@@ -7,9 +7,9 @@ import { createTestDatabase } from '../../helpers/test-db';
 let prisma: PrismaClient;
 let cleanup: () => Promise<void>;
 
-// Helper to create test game input
+// Helper to create test game input with unique PGN
 const createTestGameInput = (overrides?: Partial<CreateGameInput>): CreateGameInput => ({
-  pgn: '[Event "Test"]\n1. e4 e5 2. Nf3',
+  pgn: `[Event "Test ${Date.now()}-${Math.random()}"]\n1. e4 e5 2. Nf3`,
   playerColor: 'white',
   opponentRating: 1500,
   timeControl: '600+0',

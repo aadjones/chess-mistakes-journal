@@ -10,7 +10,7 @@ let cleanup: () => Promise<void>;
 
 const createTestGame = async () => {
   return gamesRepo.createGame(prisma, {
-    pgn: '[Event "Test"]\n1. e4 e5 2. Nf3',
+    pgn: `[Event "Test ${Date.now()}-${Math.random()}"]\n1. e4 e5 2. Nf3`,
     playerColor: 'white',
     opponentRating: 1500,
   });
