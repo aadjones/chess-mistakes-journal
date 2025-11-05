@@ -68,6 +68,14 @@ Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat confi
   - **41/41 tests passing** using Prisma migrations for test schema
   - Test helper (`__tests__/helpers/test-db.ts`) ensures schema consistency
 
+- **API Routes** (`app/api/`)
+  - Games API: POST, GET (list), GET (single), DELETE
+  - Mistakes API: POST, GET (list/filtered), GET (single), PATCH, DELETE
+  - Tags API: GET (unique tags for autocomplete)
+  - Thin controllers - validation + repository calls
+  - PGN parsing integrated into game creation
+  - Documented in `api-documentation.md`
+
 #### Documentation
 
 - `technical-architecture.md` - Comprehensive technical design
@@ -135,7 +143,7 @@ None
 - [x] Implement FEN extractor with tests
 - [x] Implement move navigator with tests
 - [x] Create data access layer (games, mistakes repositories)
-- [ ] Build game import API endpoint
+- [x] Build API endpoints (games, mistakes, tags)
 - [ ] Build game import UI form
 - [ ] Build mistake entry form
 - [ ] Build game viewer with move navigation
