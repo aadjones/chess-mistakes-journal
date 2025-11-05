@@ -6,7 +6,20 @@ All notable changes to this project will be documented in this file.
 
 ### Project Setup
 
+**Update (Evening):** Fixed ESLint configuration for Next.js 16 compatibility and added Prettier formatting.
+
+Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat config format (`eslint.config.mjs`). Added Prettier for code formatting. The new configuration:
+
+- Uses native ESLint 9 flat config (not legacy `.eslintrc.json`)
+- Configures TypeScript via `typescript-eslint`
+- Adds React and React Hooks plugins
+- Handles Node.js CommonJS files separately (config files, scripts)
+- Integrates with Prettier (disables conflicting ESLint rules)
+- Pre-commit hooks with Husky + lint-staged (auto-lint and format on commit)
+- Commands: `npm run lint`, `npm run lint:fix`, `npm run format`, `npm run format:check`
+
 #### Added
+
 - Next.js 14+ with App Router and TypeScript
 - Tailwind CSS 3.4.x for styling (explicitly using v3, not v4)
 - Prisma ORM with SQLite database
@@ -16,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - ESLint and Prettier for code quality
 
 #### Configuration
+
 - TypeScript strict mode enabled
 - Prisma schema with Game and Mistake models
 - Tailwind with PostCSS (v3 compatible configuration)
@@ -23,6 +37,7 @@ All notable changes to this project will be documented in this file.
 - Path aliases (`@/`) for clean imports
 
 #### Core Features Implemented
+
 - **PGN Parser** (`lib/chess/pgn-parser.ts`)
   - Parses PGN from Lichess, Chess.com, and standard formats
   - Extracts game headers (ratings, time control, opening, etc.)
@@ -31,6 +46,7 @@ All notable changes to this project will be documented in this file.
   - **17/17 tests passing** with real game data
 
 #### Documentation
+
 - `technical-architecture.md` - Comprehensive technical design
 - `architectural-plan.md` - High-level product strategy
 - `development-rules.md` - Critical development guidelines
@@ -40,6 +56,7 @@ All notable changes to this project will be documented in this file.
 - `CHANGELOG.md` - This file
 
 #### Development Tools
+
 - Setup verification script (`npm run verify`)
   - Checks dependency versions
   - Validates Tailwind CSS is v3, not v4
@@ -47,11 +64,13 @@ All notable changes to this project will be documented in this file.
   - Ensures PostCSS is configured correctly
 
 #### Type Definitions
+
 - `types/chess.ts` - Chess-specific types (Color, Move, ParsedGame, etc.)
 - `types/game.ts` - Game domain types
 - `types/mistake.ts` - Mistake domain types
 
 #### Test Infrastructure
+
 - Test fixtures with real PGN data from Lichess
 - Vitest setup with @testing-library/jest-dom
 - Test coverage reporting configured
@@ -80,9 +99,11 @@ All notable changes to this project will be documented in this file.
    - Components don't import Prisma directly
 
 ### Known Issues
+
 None
 
 ### Next Steps
+
 - [ ] Implement FEN extractor with tests
 - [ ] Implement move navigator with tests
 - [ ] Create data access layer (games, mistakes repositories)
@@ -96,16 +117,21 @@ None
 ## Development Guidelines
 
 ### Adding Dependencies
+
 Always verify Tailwind CSS version after `npm install`:
+
 ```bash
 npm run verify
 ```
 
 ### Writing Tests
+
 Use real PGN data from actual games. Never hand-write PGN strings.
 
 ### Committing Changes
+
 Follow conventional commit format:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `test:` - Adding tests

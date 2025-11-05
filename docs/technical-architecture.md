@@ -15,32 +15,38 @@ This document defines the detailed technical implementation strategy for Phase 1
 ## Technology Stack (Finalized)
 
 ### Core Framework
+
 - **Next.js 14.2+** (App Router)
   - TypeScript (strict mode)
   - Server Components by default
   - Client Components only when needed (interactivity)
 
 ### Database & ORM
+
 - **SQLite** (development and production)
 - **Prisma 5.x** (ORM + migrations)
   - Type generation for models
   - Migration system for schema changes
 
 ### Chess Libraries
+
 - **chess.js** - PGN parsing, move validation, FEN handling
 - **react-chessboard** - Board UI component
 
 ### UI & Styling
+
 - **Tailwind CSS 3.x** - Utility-first styling
 - **shadcn/ui** - Pre-built accessible components (optional, if needed)
 - **React Hook Form** - Form state management
 
 ### Testing
+
 - **Vitest** - Unit test runner (faster than Jest)
 - **Testing Library** - Component testing (minimal use)
 - **Supertest** - API route testing (Phase 2)
 
 ### Development Tools
+
 - **ESLint** - Linting (Next.js defaults)
 - **Prettier** - Code formatting
 - **TypeScript** - Type safety
@@ -151,11 +157,13 @@ chess-mistake-journal/
 ## Separation of Concerns
 
 ### Layer 1: Business Logic (`src/lib/`)
+
 - **Pure functions** - No dependencies on Next.js, React, or Prisma
 - **Fully testable** - Can test without database or UI
 - **Domain-focused** - Chess logic, data transformations
 
 Example:
+
 ```typescript
 // src/lib/chess/pgn-parser.ts
 export function parsePGN(pgn: string): ParsedGame {
@@ -165,11 +173,13 @@ export function parsePGN(pgn: string): ParsedGame {
 ```
 
 ### Layer 2: Data Access (`src/lib/db/`)
+
 - **Abstracts Prisma** - Components don't import Prisma directly
 - **Repository pattern** - Each model has a dedicated file
 - **Type-safe** - Uses Prisma-generated types + domain types
 
 Example:
+
 ```typescript
 // src/lib/db/games.ts
 import { prisma } from '@/lib/prisma';
@@ -185,11 +195,13 @@ export async function getGameById(id: string): Promise<Game | null> {
 ```
 
 ### Layer 3: API Routes (`src/app/api/`)
+
 - **Thin controllers** - Validate input, call data layer, return response
 - **Standard REST** - Use HTTP methods correctly
 - **Error handling** - Consistent error format
 
 Example:
+
 ```typescript
 // src/app/api/games/route.ts
 import { createGame } from '@/lib/db/games';
@@ -208,11 +220,13 @@ export async function POST(request: Request) {
 ```
 
 ### Layer 4: Components (`src/components/`)
+
 - **Presentational vs Container** - Separate data fetching from rendering
 - **Server Components by default** - Client components only for interactivity
 - **Props over hooks** - Pass data down, minimize context
 
 Example:
+
 ```typescript
 // src/components/game/GameList.tsx (Server Component)
 import { getGames } from '@/lib/db/games';
@@ -237,6 +251,7 @@ export default function ChessBoard({ position, onSquareClick }) {
 ```
 
 ### Layer 5: Pages (`src/app/`)
+
 - **Routing only** - Pages compose components, minimal logic
 - **Data loading** - Use Server Components to fetch data
 - **Layout composition** - Share layouts for consistent UI
@@ -248,6 +263,7 @@ export default function ChessBoard({ position, onSquareClick }) {
 #### 1. Business Logic (src/lib/chess/)
 
 **PGN Parser** (`pgn-parser.test.ts`):
+
 ```typescript
 describe('parsePGN', () => {
   it('extracts game metadata from valid Lichess PGN', () => {
@@ -275,6 +291,7 @@ describe('parsePGN', () => {
 ```
 
 **FEN Extractor** (`fen-extractor.test.ts`):
+
 ```typescript
 describe('getFenAtMove', () => {
   it('returns starting position for move 0', () => {
@@ -300,6 +317,7 @@ describe('getFenAtMove', () => {
 #### 2. Data Access Layer (src/lib/db/)
 
 **Games Repository** (`games.test.ts`):
+
 ```typescript
 import { createGame, getGameById } from '@/lib/db/games';
 
@@ -339,25 +357,20 @@ describe('createGame', () => {
 #### 3. API Routes (Phase 2)
 
 **Game API** (`games.test.ts`):
+
 ```typescript
 import request from 'supertest';
 
 describe('POST /api/games', () => {
   it('creates game from valid PGN', async () => {
-    const response = await request(app)
-      .post('/api/games')
-      .send({ pgn: '1. e4 e5' })
-      .expect(201);
+    const response = await request(app).post('/api/games').send({ pgn: '1. e4 e5' }).expect(201);
 
     expect(response.body.id).toBeDefined();
     expect(response.body.pgn).toBe('1. e4 e5');
   });
 
   it('returns 400 for invalid PGN', async () => {
-    const response = await request(app)
-      .post('/api/games')
-      .send({ pgn: 'invalid' })
-      .expect(400);
+    const response = await request(app).post('/api/games').send({ pgn: 'invalid' }).expect(400);
 
     expect(response.body.error).toContain('Invalid PGN');
   });
@@ -410,6 +423,7 @@ npm test pgn-parser
 ### Domain Types (src/types/)
 
 **chess.ts** - Chess-specific types:
+
 ```typescript
 export type Color = 'white' | 'black';
 export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
@@ -433,6 +447,7 @@ export interface ParsedGame {
 ```
 
 **game.ts** - Game domain types:
+
 ```typescript
 import { Color } from './chess';
 
@@ -460,6 +475,7 @@ export interface GameWithMistakes extends Game {
 ```
 
 **mistake.ts** - Mistake domain types:
+
 ```typescript
 export interface Mistake {
   id: string;
@@ -521,7 +537,10 @@ function toDomainGame(prismaGame: PrismaGame): Game {
 ```typescript
 // src/lib/utils/errors.ts
 export class ChessJournalError extends Error {
-  constructor(message: string, public code: string) {
+  constructor(
+    message: string,
+    public code: string
+  ) {
     super(message);
     this.name = 'ChessJournalError';
   }
@@ -707,12 +726,14 @@ NODE_ENV="development"
 ### Example: Game Import Feature
 
 **Step 1: Define types**
+
 ```typescript
 // src/types/game.ts
 export interface CreateGameInput { ... }
 ```
 
 **Step 2: Write test**
+
 ```typescript
 // src/__tests__/lib/chess/pgn-parser.test.ts
 describe('parsePGN', () => {
@@ -721,40 +742,47 @@ describe('parsePGN', () => {
 ```
 
 **Step 3: Implement**
+
 ```typescript
 // src/lib/chess/pgn-parser.ts
 export function parsePGN(pgn: string): ParsedGame { ... }
 ```
 
 **Step 4: Data layer**
+
 ```typescript
 // src/lib/db/games.ts
 export async function createGame(input: CreateGameInput) { ... }
 ```
 
 **Step 5: API route**
+
 ```typescript
 // src/app/api/games/route.ts
 export async function POST(request: Request) { ... }
 ```
 
 **Step 6: Component**
+
 ```typescript
 // src/components/game/GameImportForm.tsx
 export default function GameImportForm() { ... }
 ```
 
 **Step 7: Page**
+
 ```typescript
 // src/app/games/new/page.tsx
 export default function NewGamePage() { ... }
 ```
 
 **Step 8: Test in browser**
+
 - Paste PGN, verify game created
 - Check database with Prisma Studio: `npx prisma studio`
 
 **Step 9: Commit**
+
 ```bash
 git add .
 git commit -m "feat: add game import from PGN paste"
@@ -847,6 +875,7 @@ import styles from './GameList.module.css';
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `refactor`: Code restructuring without behavior change
@@ -855,6 +884,7 @@ import styles from './GameList.module.css';
 - `chore`: Build process, dependencies, etc.
 
 **Examples:**
+
 ```
 feat: add PGN import with validation
 
@@ -957,31 +987,37 @@ sqlite3 prisma/dev.db .dump > backup.sql
 ## Decision Log
 
 ### TypeScript: Strict Mode
+
 **Decision**: Use TypeScript with strict mode enabled.
 **Rationale**: Prisma generates types, Next.js supports it natively, catches bugs early.
 **Trade-off**: Slightly slower development, but worth it for type safety.
 
 ### Server Components Default
+
 **Decision**: Use Server Components by default, Client Components only when needed.
 **Rationale**: Better performance, less JavaScript shipped, simpler data fetching.
 **Trade-off**: Need to mark interactive components with 'use client' explicitly.
 
 ### No Abstraction Layers (Yet)
+
 **Decision**: Don't create service layer, repository interfaces, or dependency injection.
 **Rationale**: YAGNI for Phase 1. Can refactor later if codebase grows complex.
 **Trade-off**: Tighter coupling to Prisma, but easier to understand and modify.
 
 ### SQLite File Location
+
 **Decision**: Store `dev.db` in `prisma/` directory, gitignore it.
 **Rationale**: Keeps database with migrations, easy to back up.
 **Trade-off**: Need to manually copy DB file for backups (acceptable for MVP).
 
 ### Vitest over Jest
+
 **Decision**: Use Vitest for unit tests.
 **Rationale**: Faster, better TypeScript support, Vite-native.
 **Trade-off**: Smaller ecosystem than Jest, but Next.js supports both.
 
 ### Tailwind CSS v3.4.x (Not v4)
+
 **Decision**: Use Tailwind CSS v3.4.x, explicitly avoid v4.
 **Rationale**: Tailwind v4 changed PostCSS plugin architecture, requiring `@tailwindcss/postcss` package. V3 is stable, well-documented, and works with standard PostCSS config.
 **Trade-off**: Missing latest v4 features, but v3 has everything we need for Phase 1.

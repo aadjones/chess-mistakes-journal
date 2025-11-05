@@ -41,12 +41,30 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 
-# Lint code
+# Lint code (ESLint 9 flat config)
 npm run lint
+
+# Auto-fix lint issues
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check if code is formatted
+npm run format:check
 
 # Build for production
 npm run build
 ```
+
+**Note:** Next.js 16 removed `next lint`. We use ESLint 9 directly with flat config format.
+
+**Formatting:** We use Prettier for consistent code formatting. Pre-commit hooks automatically format staged files.
+
+**Pre-commit Hook:**
+
+- Automatically runs ESLint (with auto-fix) and Prettier on staged files
+- To bypass if needed: `git commit --no-verify`
 
 ## Project Structure
 

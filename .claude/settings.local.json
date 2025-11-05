@@ -10,7 +10,16 @@
       "Bash(node -e:*)",
       "Bash(chmod:*)",
       "Bash(npm run verify:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(npm run lint:*)",
+      "Bash(timeout 10 npm run:*)",
+      "Bash(lsof:*)",
+      "Bash(npm run format:check:*)",
+      "Bash(npm run format:*)",
+      "Bash(npx husky:*)",
+      "Bash(git add:*)",
+      "Bash(npx lint-staged)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

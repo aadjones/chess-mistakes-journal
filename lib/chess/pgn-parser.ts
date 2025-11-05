@@ -82,10 +82,7 @@ export function parsePGN(pgn: string): ParsedGame {
  * @param playerName - Name of the player journaling (optional)
  * @returns 'white' or 'black'
  */
-export function getPlayerColor(
-  parsedGame: ParsedGame,
-  playerName?: string
-): Color {
+export function getPlayerColor(parsedGame: ParsedGame, playerName?: string): Color {
   if (!playerName) {
     // Default to white if no player name specified
     return 'white';
@@ -121,13 +118,9 @@ export function getTimeControl(parsedGame: ParsedGame): string | undefined {
  * @param playerColor - Color the journaling player was playing
  * @returns Opponent rating as number or undefined
  */
-export function getOpponentRating(
-  parsedGame: ParsedGame,
-  playerColor: Color
-): number | undefined {
-  const opponentElo = playerColor === 'white'
-    ? parsedGame.headers['BlackElo']
-    : parsedGame.headers['WhiteElo'];
+export function getOpponentRating(parsedGame: ParsedGame, playerColor: Color): number | undefined {
+  const opponentElo =
+    playerColor === 'white' ? parsedGame.headers['BlackElo'] : parsedGame.headers['WhiteElo'];
 
   if (!opponentElo) return undefined;
 

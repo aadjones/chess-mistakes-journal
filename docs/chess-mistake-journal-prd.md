@@ -30,6 +30,7 @@ Chess Mistake Journal is a web app for serious chess improvers to systematically
 ## Technical Architecture
 
 ### Tech Stack
+
 - **Frontend:** React + TypeScript (create-react-app or Vite)
   - Chess board component: react-chessboard or chessground
   - Charts: recharts or Chart.js for dashboard visualizations
@@ -46,9 +47,11 @@ Chess Mistake Journal is a web app for serious chess improvers to systematically
 ### Data Model
 
 **Games:**
+
 - id, user_id, external_link, pgn, player_color, opponent_rating, time_control, date_played, created_at
 
 **Mistakes:**
+
 - id, game_id, move_number, fen_position, brief_description, primary_tag, created_at, updated_at
 - **Linking fields:**
   - linked_to_mistake_id (nullable foreign key - references the mistake this caused)
@@ -65,22 +68,26 @@ Chess Mistake Journal is a web app for serious chess improvers to systematically
   - general_notes (text)
 
 **Tags:**
+
 - id, user_id, tag_name, usage_count, last_used
 
 ### Key Components
 
 **Game Import Module:**
+
 - `GameImporter.tsx` - Accepts Lichess/Chess.com URLs or raw PGN
 - API parser for Lichess/Chess.com JSON (fetch game data via their APIs)
 - PGN parser library (chess.js or similar)
 
 **Journaling Interface:**
+
 - `GameReviewBoard.tsx` - Interactive chess board with move navigation
 - `MistakeForm.tsx` - Structured reflection prompts with progressive disclosure
 - `MistakeLinker.tsx` - UI for creating and visualizing mistake chains within a game
 - `TagSelector.tsx` - Autocomplete tag input that learns from user's history
 
 **Dashboard/Analytics:**
+
 - `PatternDashboard.tsx` - Primary view showing mistake frequency over time
 - `TagDistribution.tsx` - Bar/pie chart of most common mistake types
 - `CausalityAnalysis.tsx` - Visualizes root causes vs. consequences, shows most common causal chains
@@ -88,6 +95,7 @@ Chess Mistake Journal is a web app for serious chess improvers to systematically
 - `MistakeLog.tsx` - Searchable/filterable list of all logged mistakes with linked chain indicators
 
 **Search & Filter:**
+
 - Full-text search across brief descriptions and reflection text
 - Filter by: date range, tag, opening, time control, opponent rating range, game phase
 
@@ -95,15 +103,17 @@ Chess Mistake Journal is a web app for serious chess improvers to systematically
 
 ### Structured Thought Process Interrogation
 
-The core value is forcing systematic reflection on *why* thinking failed, not just documenting *that* it failed. The prompts are designed to reconstruct the actual thought process and identify specific cognitive gaps.
+The core value is forcing systematic reflection on _why_ thinking failed, not just documenting _that_ it failed. The prompts are designed to reconstruct the actual thought process and identify specific cognitive gaps.
 
 **Thought Process Reconstruction Questions:**
+
 - "What candidate moves did you consider?" → Reveals if the right move was in the search tree at all
 - "What was your opponent's main threat? Did you see it?" → Tests threat awareness
 - "What did you calculate? How far did you look?" → Exposes calculation discipline
 - "What was your time situation?" → Identifies time management issues
 
 **Root Cause Analysis:**
+
 - "Was this mistake inevitable given earlier decisions? If so, which move(s)?" → Critical for identifying strategic errors that only become obvious tactically later
   - Example: "Move 23 was a blunder, but the real mistake was move 19 when I allowed the knight to reach d5"
   - This reveals patterns like: "I consistently underestimate piece activity consequences 3-4 moves down the line"
@@ -112,6 +122,7 @@ The core value is forcing systematic reflection on *why* thinking failed, not ju
 - "What would you need to think about differently to avoid this in the future?" → Forces user to identify the training need
 
 These questions should reveal patterns like:
+
 - "I never calculate backward moves" (visualization blind spot)
 - "I consistently underestimate opponent threats when I have my own attack" (selective attention)
 - "I make committal positional decisions without calculating forced sequences" (planning without calculation)
@@ -123,35 +134,41 @@ These questions should reveal patterns like:
 Users can create explicit connections between mistakes to trace causal chains. This is critical for understanding that many "tactical blunders" are actually consequences of earlier strategic/positional decisions.
 
 **How it works:**
+
 - When reflecting on a mistake, user identifies an earlier move that made the current mistake inevitable
 - System prompts: "Do you want to create a separate journal entry for move X?"
 - If yes, creates a linked mistake entry with bidirectional references
 - Both entries show the connection in the UI
 
 **Example chain:**
+
 - **Move 11:** Accepted doubled f-pawns to trade off defender (tagged: "weakened king safety")
   - Links forward to → Move 19
 - **Move 19:** Allowed Qh5+ winning material (tagged: "tactical blow", "inevitable consequence")
   - Links backward to ← Move 11
 
 **Dashboard insights this enables:**
+
 - "You logged 23 tactical mistakes, but 15 were inevitable consequences of earlier decisions"
 - "Your most common root cause: accepting king weaknesses without calculating forced sequences"
 - Filter view: "Show me only root-cause mistakes (not consequences)"
 - Pattern detection: "Strategic decisions on moves 10-15 frequently lead to tactical problems on moves 18-22"
 
 **Implementation notes:**
+
 - Mistakes table needs `linked_to_mistake_id` (nullable foreign key to self)
 - UI shows both directions: "This led to mistake on move 19" / "This was caused by decision on move 11"
 - Tag suggestions: system can suggest "inevitable consequence" or "root cause" tags based on linking behavior
 
 This transforms the tool from "mistake catalog" to "causal chain analyzer" - much more powerful for identifying actual improvement areas.
+
 - **Tier 1 (Required):** Brief description + primary tag (<30 seconds)
 - **Tier 2 (Optional):** Structured thought process interrogation (5-10 minutes)
 - **Tier 3 (Optional):** General notes field for anything that doesn't fit the structure
 - Users can return later to expand reflections on previously logged mistakes
 
 ### Tag System Philosophy
+
 - No rigid predefined taxonomy
 - Users create tags organically as they journal
 - AI-assisted suggestions based on free text (future enhancement)
@@ -159,6 +176,7 @@ This transforms the tool from "mistake catalog" to "causal chain analyzer" - muc
 - System tracks tag frequency to show common patterns
 
 ### Optional Engine Integration
+
 - Stockfish can flag candidate mistake moves (loss of 0.5+ pawns)
 - Presents as suggestions, not requirements: "Consider reviewing moves 15-18"
 - User decides what's actually worth journaling
@@ -196,12 +214,14 @@ cd backend && npm run dev
 ## Testing Philosophy
 
 **What gets tested:**
+
 - Game import from various sources (Lichess, Chess.com, raw PGN)
 - Data integrity (games, mistakes, tags persist correctly)
 - Search and filter functionality
 - Dashboard calculations (tag frequency, trend analysis)
 
 **What doesn't get tested (initially):**
+
 - UI components in isolation
 - Visual regression testing
 - Performance under heavy load (not needed for single-user MVP)
@@ -219,11 +239,13 @@ Focus on core journaling workflow reliability - if data is lost or corrupted, th
 ## Business Model Considerations
 
 ### MVP (Free, Single-User)
+
 - Free tool for individual improvers
 - Validates core value prop: does structured journaling actually help?
 - Portfolio piece demonstrating full-stack + chess domain expertise
 
 ### Future Monetization Options
+
 - **Freemium:** Limited games/mistakes for free users, unlimited for paid (~$5-10/month)
 - **Coach Platform:** Paid tier for coaches to view student journals (~$20-50/month per coach)
 - **Aggregated Insights:** "Players at your rating struggle most with X" (requires user base)

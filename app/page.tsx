@@ -35,3 +35,4 @@ export default function HomePage() {
     </div>
   );
 }
+// Test pre-commit hook

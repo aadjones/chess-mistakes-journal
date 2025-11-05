@@ -13,9 +13,7 @@ let errors = 0;
 let warnings = 0;
 
 // Check package.json dependencies
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
-);
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
 
 // Verify Tailwind CSS version
 const tailwindVersion = packageJson.devDependencies?.tailwindcss;
@@ -86,7 +84,7 @@ const requiredFiles = [
 ];
 
 console.log('\n📄 Checking configuration files...');
-requiredFiles.forEach((file) => {
+requiredFiles.forEach(file => {
   const filePath = path.join(__dirname, '..', file);
   if (fs.existsSync(filePath)) {
     console.log(`✅ ${file}`);

@@ -2,6 +2,27 @@
 
 ## Dependencies
 
+### Next.js 16 - ESLint Changes
+
+**Next.js 16 removed the `next lint` command.**
+
+Use ESLint directly with the flat config format (`eslint.config.mjs`):
+
+```bash
+# Run linting
+npm run lint
+
+# Auto-fix issues
+npm run lint:fix
+```
+
+The project uses ESLint 9 with flat config format:
+
+- Native support for TypeScript via `typescript-eslint`
+- React and React Hooks plugins configured
+- Separate configuration for Node.js files (CommonJS)
+- Ignores `.next/`, `node_modules/`, etc.
+
 ### Tailwind CSS v3.x (Not v4)
 
 **Use Tailwind CSS v3.4.x**, not v4.
@@ -14,6 +35,7 @@ npm install -D tailwindcss@^3.4.0 postcss autoprefixer
 ```
 
 The standard PostCSS config works with v3:
+
 ```js
 // postcss.config.js
 module.exports = {
@@ -21,7 +43,7 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
   },
-}
+};
 ```
 
 ## Code Quality
@@ -40,6 +62,7 @@ AI language models (including the one writing this) will inevitably hallucinate 
 ### Examples
 
 #### Good: Real game from Lichess
+
 ```typescript
 // Fetched from https://lichess.org/game/export/q7ZvsdUF
 export const REAL_GAME = `[Event "Winter Arena"]
@@ -50,6 +73,7 @@ export const REAL_GAME = `[Event "Winter Arena"]
 ```
 
 #### Bad: Hand-written PGN
+
 ```typescript
 // DON'T DO THIS - will have illegal moves
 export const FAKE_GAME = `1. e4 e5 2. Nf3 Nc6 3. Bb5 Nce7 ...`;
