@@ -1,177 +1,79 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## 2025-11-05 - Phase 1 Complete
 
-## [0.1.0] - 2024-11-04
+### Infrastructure
 
-### Project Setup
+- ✅ Next.js 16 with App Router and TypeScript
+- ✅ React 19
+- ✅ Tailwind CSS 3.4.18
+- ✅ Prisma 6.18 + SQLite
+- ✅ Vitest 4.0.7
+- ✅ ESLint 9 with flat config
+- ✅ Prettier + Husky pre-commit hooks
 
-**Update (Evening):** Fixed ESLint configuration for Next.js 16 compatibility and added Prettier formatting.
+### Chess Logic
 
-Next.js 16 removed the `next lint` command. Migrated to ESLint 9 with flat config format (`eslint.config.mjs`). Added Prettier for code formatting. The new configuration:
+- ✅ PGN parser with annotation cleaning
+- ✅ FEN extractor
+- ✅ Move navigator
+- ✅ All utilities fully tested (65+ tests passing)
 
-- Uses native ESLint 9 flat config (not legacy `.eslintrc.json`)
-- Configures TypeScript via `typescript-eslint`
-- Adds React and React Hooks plugins
-- Handles Node.js CommonJS files separately (config files, scripts)
-- Integrates with Prettier (disables conflicting ESLint rules)
-- Pre-commit hooks with Husky + lint-staged (auto-lint and format on commit)
-- Commands: `npm run lint`, `npm run lint:fix`, `npm run format`, `npm run format:check`
+### Data Layer
 
-#### Added
+- ✅ Database schema (Game, Mistake models)
+- ✅ Repository pattern (games, mistakes)
+- ✅ Unique PGN constraint
+- ✅ FEN storage on mistakes
+- ✅ Cascade deletes
 
-- Next.js 14+ with App Router and TypeScript
-- Tailwind CSS 3.4.x for styling (explicitly using v3, not v4)
-- Prisma ORM with SQLite database
-- Vitest for unit testing
-- chess.js for PGN parsing and move validation
-- react-chessboard for board UI
-- ESLint and Prettier for code quality
+### API
 
-#### Configuration
+- ✅ Games: GET, POST, GET/:id, PATCH/:id, DELETE/:id
+- ✅ Mistakes: GET, POST, GET/:id, PATCH/:id, DELETE/:id
+- ✅ Tags: GET
 
-- TypeScript strict mode enabled
-- Prisma schema with Game and Mistake models
-- Tailwind with PostCSS (v3 compatible configuration)
-- Vitest configured with jsdom environment
-- Path aliases (`@/`) for clean imports
+### Frontend
 
-#### Core Features Implemented
+- ✅ Game viewer with move navigation
+- ✅ Mistake form with tag autocomplete
+- ✅ Mistakes list with filtering
+- ✅ Mistake detail page
+- ✅ Delete functionality on both pages
 
-- **PGN Parser** (`lib/chess/pgn-parser.ts`)
-  - Parses PGN from Lichess, Chess.com, and standard formats
-  - Extracts game headers (ratings, time control, opening, etc.)
-  - Extracts moves with full metadata (color, piece, captures, flags)
-  - Helper functions for player color, opponent rating, date extraction
-  - **17/17 tests passing** with real game data
+### Bug Fixes
 
-- **FEN Extractor** (`lib/chess/fen-extractor.ts`)
-  - Extracts board position (FEN string) at any move number
-  - Leverages chess.js `.fen()` method (no wheel reinvention)
-  - Validates move numbers and provides clear error messages
-  - Returns starting FEN for move 0
-  - **13/13 tests passing** with comprehensive validation
-
-- **Move Navigator** (`lib/chess/move-navigator.ts`)
-  - Navigate forward/backward through game moves
-  - Jump to any move or start/end positions
-  - Query navigation state (isAtStart, isAtEnd, canGoForward, etc.)
-  - Leverages chess.js `.undo()` for backward navigation
-  - Maintains Chess instance for efficient position tracking
-  - **35/35 tests passing** covering all navigation scenarios
-
-- **Data Access Layer** (`lib/db/`)
-  - Repository pattern with dependency injection
-  - Games repository: CRUD operations for games
-  - Mistakes repository: CRUD operations with tag management
-  - Domain types separate from Prisma types (clean boundaries)
-  - **41/41 tests passing** using Prisma migrations for test schema
-  - Test helper (`__tests__/helpers/test-db.ts`) ensures schema consistency
-
-- **API Routes** (`app/api/`)
-  - Games API: POST, GET (list), GET (single), DELETE
-  - Mistakes API: POST, GET (list/filtered), GET (single), PATCH, DELETE
-  - Tags API: GET (unique tags for autocomplete)
-  - Thin controllers - validation + repository calls
-  - PGN parsing integrated into game creation
-  - Documented in `api-documentation.md`
-
-#### Documentation
-
-- `technical-architecture.md` - Comprehensive technical design
-- `architectural-plan.md` - High-level product strategy
-- `development-rules.md` - Critical development guidelines
-  - Never hand-write PGN data (use real games only)
-  - Tailwind CSS v3.4.x requirement (not v4)
-  - Don't reinvent the wheel (use existing libraries)
-- `testing-strategy.md` - Database testing approach
-  - Use Prisma migrations for test schemas
-  - Isolated file-based databases per test suite
-  - Domain-driven repository pattern
-- `README.md` - Project overview and setup instructions
-- `CHANGELOG.md` - This file
-
-#### Development Tools
-
-- Setup verification script (`npm run verify`)
-  - Checks dependency versions
-  - Validates Tailwind CSS is v3, not v4
-  - Verifies configuration files exist
-  - Ensures PostCSS is configured correctly
-
-#### Type Definitions
-
-- `types/chess.ts` - Chess-specific types (Color, Move, ParsedGame, etc.)
-- `types/game.ts` - Game domain types
-- `types/mistake.ts` - Mistake domain types
-
-#### Test Infrastructure
-
-- Test fixtures with real PGN data from Lichess
-- Vitest setup with @testing-library/jest-dom
-- Test coverage reporting configured
-
-### Technical Decisions
-
-1. **Tailwind CSS v3.4.x over v4**
-   - V4 requires separate `@tailwindcss/postcss` package
-   - V3 is stable, well-documented, works with standard PostCSS
-   - Decision documented in technical architecture
-
-2. **SQLite over PostgreSQL**
-   - Zero ops burden for single-user MVP
-   - File-based, easy backups
-   - Can migrate to PostgreSQL later if needed
-
-3. **Server Components by default**
-   - Less JavaScript shipped to client
-   - Better performance
-   - Client Components only for interactivity
-
-4. **Strict separation of concerns**
-   - Business logic in `lib/` (pure functions)
-   - Data access in `lib/db/` (repository pattern)
-   - API routes are thin controllers
-   - Components don't import Prisma directly
-
-### Known Issues
-
-None
-
-### Next Steps
-
-- [x] Implement FEN extractor with tests
-- [x] Implement move navigator with tests
-- [x] Create data access layer (games, mistakes repositories)
-- [x] Build API endpoints (games, mistakes, tags)
-- [ ] Build game import UI form
-- [ ] Build mistake entry form
-- [ ] Build game viewer with move navigation
+- ✅ Fixed chessboard not updating (added `key={fen}`)
+- ✅ Fixed board sizing issues (max-width constraints)
+- ✅ Improved move list layout (2-column table format)
 
 ---
 
-## Development Guidelines
+## 2024-11-04 - Initial Setup
 
-### Adding Dependencies
+### Project Setup
 
-Always verify Tailwind CSS version after `npm install`:
+- Next.js 16 project initialization
+- Prisma schema and migrations
+- TypeScript configuration
+- Tailwind CSS 3.4.x setup
+- Vitest testing infrastructure
+- ESLint 9 + Prettier configuration
 
-```bash
-npm run verify
-```
+### Core Features
 
-### Writing Tests
+- PGN parser (17/17 tests)
+- FEN extractor (13/13 tests)
+- Move navigator (35/35 tests)
+- Data access layer (41/41 tests)
 
-Use real PGN data from actual games. Never hand-write PGN strings.
+### Documentation
 
-### Committing Changes
+- Technical architecture document
+- Development rules
+- Testing strategy
+- API documentation
 
-Follow conventional commit format:
+---
 
-- `feat:` - New feature
-- `fix:` - Bug fix
-- `test:` - Adding tests
-- `docs:` - Documentation changes
-- `refactor:` - Code restructuring
-
-Example: `feat: add PGN parser with full test coverage`
+**Note**: This changelog tracks major milestones. For detailed commit history, use `git log`.

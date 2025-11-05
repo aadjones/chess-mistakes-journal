@@ -2,23 +2,11 @@
 
 A systematic tool for tracking and analyzing chess mistakes to accelerate improvement.
 
-## Tech Stack
-
-- **Next.js 14+** (App Router, TypeScript)
-- **Tailwind CSS 3.4.x** (utility-first styling)
-- **Prisma + SQLite** (database ORM)
-- **chess.js** (PGN parsing, move validation)
-- **react-chessboard** (board UI)
-- **Vitest** (testing)
-
-## Setup
+## Quick Start
 
 ```bash
 # Install dependencies
 npm install
-
-# Verify setup is correct
-npm run verify
 
 # Set up database
 npx prisma migrate dev
@@ -29,91 +17,54 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## Development
+## Tech Stack
+
+- **Next.js 16** (App Router, TypeScript)
+- **React 19**
+- **Tailwind CSS 3.4** (utility-first styling)
+- **Prisma 6** + SQLite (database ORM)
+- **chess.js** (PGN parsing, move validation)
+- **react-chessboard** (board UI)
+- **Vitest 4** (testing)
+
+## Commands
 
 ```bash
-# Run tests
-npm test
+# Development
+npm run dev              # Start dev server
+npm test                 # Run tests
+npm run test:watch       # Run tests in watch mode
+npm run lint             # Lint code
+npm run lint:fix         # Auto-fix lint issues
+npm run format           # Format with Prettier
+npm run build            # Build for production
 
-# Run tests in watch mode
-npm run test:watch
+# Database
+npx prisma migrate dev   # Run migrations
+npx prisma studio        # Open database GUI
 
-# Run tests with coverage
-npm run test:coverage
-
-# Lint code (ESLint 9 flat config)
-npm run lint
-
-# Auto-fix lint issues
-npm run lint:fix
-
-# Format code with Prettier
-npm run format
-
-# Check if code is formatted
-npm run format:check
-
-# Build for production
-npm run build
+# Utilities
+npm run verify           # Verify setup is correct
+npm run reset            # Clear build cache
 ```
 
-**Note:** Next.js 16 removed `next lint`. We use ESLint 9 directly with flat config format.
+## Documentation
 
-**Formatting:** We use Prettier for consistent code formatting. Pre-commit hooks automatically format staged files.
-
-**Pre-commit Hook:**
-
-- Automatically runs ESLint (with auto-fix) and Prettier on staged files
-- To bypass if needed: `git commit --no-verify`
+- [Architecture](./docs/architecture.md) - System architecture and design decisions
+- [Development Rules](./docs/development-rules.md) - Critical development guidelines
+- [Changelog](./docs/changelog.md) - Feature history
 
 ## Project Structure
 
 ```
 ├── app/              # Next.js App Router pages & API routes
-├── components/       # React components
-├── lib/              # Core business logic (pure functions)
+├── lib/              # Core business logic (chess utilities, repositories)
 ├── types/            # TypeScript type definitions
 ├── prisma/           # Database schema & migrations
 ├── __tests__/        # Test files
 └── docs/             # Documentation
 ```
 
-## Key Documents
-
-- [Technical Architecture](./docs/technical-architecture.md) - Detailed architecture decisions
-- [Architectural Plan](./docs/architectural-plan.md) - High-level product strategy
-- [Development Rules](./docs/development-rules.md) - Critical development guidelines
-
-## Important Notes
-
-### Tailwind CSS Version
-
-**Use Tailwind v3.4.x, NOT v4.**
-
-Tailwind v4 changed the PostCSS plugin system. If you accidentally install v4:
-
-```bash
-npm uninstall tailwindcss
-npm install -D tailwindcss@^3.4.0 postcss autoprefixer
-```
-
-### PGN Data in Tests
-
-**Never hand-write PGN game data.** AI models will generate illegal chess moves.
-
-Always use real PGN data from Lichess, Chess.com, or other platforms. See [Development Rules](./docs/development-rules.md) for details.
-
-## Phase 1 Goals
-
-- [x] Project setup with Next.js, Prisma, Tailwind
-- [x] PGN parser with full test coverage
-- [x] FEN extractor with tests
-- [x] Move navigator with tests
-- [ ] Data access layer (games, mistakes)
-- [ ] Game import UI and API
-- [ ] Mistake entry form
-- [ ] Basic game viewer with move navigation
-
 ## License
 
-Private project - not licensed for distribution.
+MIT License - see [LICENSE](LICENSE) file for details.

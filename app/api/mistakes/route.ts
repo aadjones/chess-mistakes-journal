@@ -43,16 +43,18 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/mistakes
- * List all mistakes (optionally filtered by gameId)
+ * List all mistakes with game data (optionally filtered by gameId)
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get('gameId');
 
-    const mistakes = gameId
-      ? await mistakesRepo.getMistakesByGameId(prisma, gameId)
-      : await mistakesRepo.getAllMistakes(prisma);
+    const mistakes = await prisma.mistake.findMany({
+      where: gameId ? { gameId } : undefined,
+      include: { game: true },
+      orderBy: { createdAt: 'desc' },
+    });
 
     return NextResponse.json({ mistakes });
   } catch (error) {

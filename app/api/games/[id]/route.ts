@@ -5,7 +5,7 @@ import * as gamesRepo from '@/lib/db/games-repository';
 const prisma = new PrismaClient();
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 /**
@@ -14,7 +14,7 @@ type RouteContext = {
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const game = await gamesRepo.getGameWithMistakes(prisma, id);
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
  */
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     await gamesRepo.deleteGame(prisma, id);
 

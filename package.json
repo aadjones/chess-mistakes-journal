@@ -15,7 +15,8 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "verify": "node scripts/verify-setup.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "reset": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && rm -rf .next && echo '✅ Port 3000 cleared and cache removed! Run: npm run dev'"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",

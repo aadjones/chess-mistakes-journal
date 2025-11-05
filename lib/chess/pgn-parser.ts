@@ -23,8 +23,12 @@ export function parsePGN(pgn: string): ParsedGame {
   try {
     const chess = new Chess();
 
+    // Clean PGN by removing all comments/annotations that chess.js doesn't handle
+    // This includes clock annotations { [%clk 0:03:00] }, opening names, etc.
+    const cleanedPgn = pgn.replace(/\{[^}]*\}/g, '').trim();
+
     // Load PGN into chess.js (throws on error)
-    chess.loadPgn(pgn);
+    chess.loadPgn(cleanedPgn);
 
     // Extract headers
     const headers: Record<string, string> = {};

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { parsePGN, getPlayerColor, getOpponentRating, getGameDate } from '@/lib/chess/pgn-parser';
+import { parsePGN, getPlayerColor, getOpponentRating, getDatePlayed } from '@/lib/chess/pgn-parser';
 import * as gamesRepo from '@/lib/db/games-repository';
 import type { CreateGameInput } from '@/types/game';
 
@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
     // Parse PGN to validate and extract metadata
     const parsed = parsePGN(pgn);
 
-    // Extract metadata from headers
-    const playerColor = getPlayerColor(parsed.headers);
-    const opponentRating = getOpponentRating(parsed.headers, playerColor);
-    const datePlayed = getGameDate(parsed.headers);
+    // Extract metadata from parsed game
+    const playerColor = getPlayerColor(parsed);
+    const opponentRating = getOpponentRating(parsed, playerColor);
+    const datePlayed = getDatePlayed(parsed);
     const timeControl = parsed.headers.TimeControl;
 
     // Create game input
@@ -46,6 +46,11 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error && error.name === 'PGNParseError') {
       return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    // Handle duplicate PGN (unique constraint violation)
+    if (error instanceof Error && error.message.includes('Unique constraint failed')) {
+      return NextResponse.json({ error: 'This game has already been imported' }, { status: 409 });
     }
 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -6,18 +6,21 @@ import type { UpdateMistakeInput } from '@/types/mistake';
 const prisma = new PrismaClient();
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 /**
  * GET /api/mistakes/[id]
- * Get a single mistake
+ * Get a single mistake with game data
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    const mistake = await mistakesRepo.getMistakeById(prisma, id);
+    const mistake = await prisma.mistake.findUnique({
+      where: { id },
+      include: { game: true },
+    });
 
     if (!mistake) {
       return NextResponse.json({ error: 'Mistake not found' }, { status: 404 });
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
  */
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { briefDescription, primaryTag, detailedReflection } = body;
 
@@ -65,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
  */
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     await mistakesRepo.deleteMistake(prisma, id);
 

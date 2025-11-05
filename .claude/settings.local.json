@@ -22,7 +22,12 @@
       "Bash(git restore:*)",
       "Bash(git commit:*)",
       "Bash(node test-chess-methods.js:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

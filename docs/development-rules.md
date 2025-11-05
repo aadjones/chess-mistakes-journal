@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-### Next.js 16 - ESLint Changes
+### Next.js 16 - Breaking Changes
 
 **Next.js 16 removed the `next lint` command.**
 
@@ -22,6 +22,34 @@ The project uses ESLint 9 with flat config format:
 - React and React Hooks plugins configured
 - Separate configuration for Node.js files (CommonJS)
 - Ignores `.next/`, `node_modules/`, etc.
+
+**Next.js 16 - `params` is now a Promise in API routes**
+
+In dynamic API routes (e.g., `app/api/games/[id]/route.ts`), the `params` object is now a Promise and must be awaited:
+
+```typescript
+// ❌ WRONG - Next.js 15 and earlier
+export async function GET(request: NextRequest, { params }: RouteContext) {
+  const { id } = params; // This will error in Next.js 16!
+  // ...
+}
+
+// ✅ CORRECT - Next.js 16
+type RouteContext = {
+  params: Promise<{ id: string }>; // Note: Promise type
+};
+
+export async function GET(request: NextRequest, { params }: RouteContext) {
+  const { id } = await params; // Must await!
+  // ...
+}
+```
+
+This applies to ALL route handlers (GET, POST, PATCH, DELETE) in dynamic routes like:
+
+- `app/api/games/[id]/route.ts`
+- `app/api/mistakes/[id]/route.ts`
+- Any other `[param]` routes
 
 ### Tailwind CSS v3.x (Not v4)
 
@@ -75,6 +103,23 @@ AI language models (including the one writing this) will inevitably hallucinate 
 3. **Validate PGN** by loading it with chess.js before using in tests
 4. **Keep test PGNs simple** - shorter games are easier to validate
 
+### PGN Annotation Cleaning
+
+**chess.js cannot parse PGN annotations** like clock times `{ [%clk 0:03:00] }` that Lichess and other platforms include.
+
+Always clean PGN before passing it to chess.js:
+
+```typescript
+// Strip all {…} annotations before parsing
+const cleanedPgn = pgn.replace(/\{[^}]*\}/g, '').trim();
+chess.loadPgn(cleanedPgn);
+```
+
+This cleaning happens in:
+
+- `lib/chess/pgn-parser.ts` - when importing games via API
+- `app/games/[id]/page.tsx` - when displaying games in the viewer
+
 ### Examples
 
 #### Good: Real game from Lichess
@@ -108,3 +153,15 @@ export const FAKE_GAME = `1. e4 e5 2. Nf3 Nc6 3. Bb5 Nce7 ...`;
 - Use domain types, not Prisma types, in public APIs
 - Server Components by default, Client Components only when needed
 - API routes are thin controllers - validation + data layer calls
+
+## Database Constraints
+
+### Unique PGN Constraint
+
+The `Game` model has a unique constraint on the `pgn` field to prevent duplicate game imports. This means:
+
+- Two identical PGN strings cannot be imported
+- The API returns a 409 Conflict status with message "This game has already been imported"
+- PGN is cleaned (annotations removed) before storage, so the comparison is based on the raw PGN string
+
+If you need to reimport a game, delete it first via the API or database.
