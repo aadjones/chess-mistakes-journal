@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Chessboard } from 'react-chessboard';
+import { PlayerChessboard } from '@/components/PlayerChessboard';
 import type { Mistake, Game } from '@prisma/client';
 
 type MistakeWithGame = Mistake & { game: Game };
@@ -161,11 +161,9 @@ export default function MistakesListPage() {
                   {/* Chessboard Preview */}
                   <div className="md:col-span-1">
                     <div className="max-w-xs mx-auto">
-                      <Chessboard
-                        options={{
-                          position: mistake.fenPosition,
-                          allowDragging: false,
-                        }}
+                      <PlayerChessboard
+                        position={mistake.fenPosition}
+                        playerColor={mistake.game.playerColor}
                       />
                     </div>
                   </div>

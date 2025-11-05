@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { pgn } = body;
+    const { pgn, playerColor: userProvidedColor } = body;
 
     if (!pgn || typeof pgn !== 'string') {
       return NextResponse.json({ error: 'PGN is required and must be a string' }, { status: 400 });
@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
     // Parse PGN to validate and extract metadata
     const parsed = parsePGN(pgn);
 
-    // Extract metadata from parsed game
-    const playerColor = getPlayerColor(parsed);
+    // Use player-provided color if available, otherwise try to detect from PGN
+    const playerColor = userProvidedColor || getPlayerColor(parsed);
     const opponentRating = getOpponentRating(parsed, playerColor);
     const datePlayed = getDatePlayed(parsed);
     const timeControl = parsed.headers.TimeControl;

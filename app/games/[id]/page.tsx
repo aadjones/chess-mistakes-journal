@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Chess } from 'chess.js';
-import { Chessboard } from 'react-chessboard';
+import { PlayerChessboard } from '@/components/PlayerChessboard';
 import type { Game, Mistake } from '@prisma/client';
 
 type GameWithMistakes = Game & { mistakes: Mistake[] };
@@ -114,6 +114,26 @@ export default function GameViewerPage() {
   const moveNumber = Math.floor(currentMoveIndex / 2) + 1;
   const isWhiteMove = currentMoveIndex % 2 === 0;
 
+  // Format time control to show minutes (e.g., "180+2" -> "3+2")
+  const formatTimeControl = (timeControl: string): string => {
+    if (!timeControl) return timeControl;
+
+    const parts = timeControl.split('+');
+    if (parts.length === 2) {
+      const minutes = Math.floor(parseInt(parts[0]) / 60);
+      const increment = parts[1];
+      return `${minutes}+${increment}`;
+    }
+
+    // For formats without increment (e.g., "180")
+    if (!timeControl.includes('+')) {
+      const minutes = Math.floor(parseInt(timeControl) / 60);
+      return `${minutes}`;
+    }
+
+    return timeControl;
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
@@ -132,7 +152,7 @@ export default function GameViewerPage() {
           )}
           {game.timeControl && (
             <p>
-              <strong>Time Control:</strong> {game.timeControl}
+              <strong>Time Control:</strong> {formatTimeControl(game.timeControl)}
             </p>
           )}
           {game.datePlayed && (
@@ -147,12 +167,10 @@ export default function GameViewerPage() {
         {/* Chessboard */}
         <div>
           <div className="bg-white rounded-lg shadow p-4">
-            <Chessboard
+            <PlayerChessboard
               key={chessGame.fen()}
-              options={{
-                position: chessGame.fen(),
-                allowDragging: false,
-              }}
+              position={chessGame.fen()}
+              playerColor={game.playerColor}
             />
 
             {/* Navigation Controls */}

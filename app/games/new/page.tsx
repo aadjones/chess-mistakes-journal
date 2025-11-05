@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function NewGamePage() {
   const router = useRouter();
   const [pgn, setPgn] = useState('');
+  const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +19,7 @@ export default function NewGamePage() {
       const response = await fetch('/api/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pgn }),
+        body: JSON.stringify({ pgn, playerColor }),
       });
 
       const data = await response.json();
@@ -45,6 +46,21 @@ export default function NewGamePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+        <div className="mb-4">
+          <label htmlFor="playerColor" className="block text-sm font-medium text-gray-700 mb-2">
+            You played as
+          </label>
+          <select
+            id="playerColor"
+            value={playerColor}
+            onChange={e => setPlayerColor(e.target.value as 'white' | 'black')}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="white">White</option>
+            <option value="black">Black</option>
+          </select>
+        </div>
+
         <div className="mb-4">
           <label htmlFor="pgn" className="block text-sm font-medium text-gray-700 mb-2">
             PGN

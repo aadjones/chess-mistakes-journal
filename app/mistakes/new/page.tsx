@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Chessboard } from 'react-chessboard';
+import { PlayerChessboard } from '@/components/PlayerChessboard';
 
 export default function NewMistakePage() {
   const router = useRouter();
@@ -19,6 +19,7 @@ export default function NewMistakePage() {
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
 
   useEffect(() => {
     // Fetch existing tags for autocomplete
@@ -35,6 +36,23 @@ export default function NewMistakePage() {
     }
     loadTags();
   }, []);
+
+  useEffect(() => {
+    // Fetch game to get player color
+    async function loadGame() {
+      if (!gameId) return;
+      try {
+        const response = await fetch(`/api/games/${gameId}`);
+        const data = await response.json();
+        if (response.ok && data.game) {
+          setPlayerColor(data.game.playerColor);
+        }
+      } catch (err) {
+        console.error('Failed to load game:', err);
+      }
+    }
+    loadGame();
+  }, [gameId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,12 +133,7 @@ export default function NewMistakePage() {
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="font-semibold mb-3">Position</h3>
           <div className="max-w-md mx-auto">
-            <Chessboard
-              options={{
-                position: fen,
-                allowDragging: false,
-              }}
-            />
+            <PlayerChessboard position={fen} playerColor={playerColor} />
           </div>
         </div>
 
