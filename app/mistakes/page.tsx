@@ -222,7 +222,10 @@ export default function MistakesListPage() {
                           ` • ${formatTimeControl(mistake.game.timeControl)}`}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Recorded {new Date(mistake.createdAt).toLocaleDateString()}
+                        Played{' '}
+                        {mistake.game.datePlayed
+                          ? new Date(mistake.game.datePlayed).toLocaleDateString()
+                          : 'Unknown date'}
                       </p>
                     </div>
 

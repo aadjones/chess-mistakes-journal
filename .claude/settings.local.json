@@ -33,7 +33,8 @@
       "Bash(xargs kill -9)",
       "Bash(timeout 30 npx next build:*)",
       "Bash(npx tsx:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(npx prisma studio:*)"
     ],
     "deny": [],
     "ask": []
