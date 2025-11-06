@@ -145,7 +145,8 @@ export default function MistakesListPage() {
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <h2 className="text-xl font-semibold mb-2">No mistakes recorded yet</h2>
           <p className="text-gray-600 mb-6">
-            Get started by importing a game and recording your first mistake.
+            Track and reflect on your chess mistakes to find patterns and improve. Get started by
+            importing a game and recording your first mistake.
           </p>
           <div className="space-y-4 max-w-md mx-auto text-left">
             <div className="flex items-start gap-3">

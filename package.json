@@ -21,6 +21,7 @@
     "db:backup": "./scripts/backup-db.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
     "@prisma/client": "^6.18.0",
     "chess.js": "^1.4.0",
     "next": "^16.0.1",

@@ -5,15 +5,37 @@ import { usePathname } from 'next/navigation';
 
 export function Header() {
   const pathname = usePathname();
-  const showImportButton = pathname === '/mistakes' || pathname === '/';
+  const showImportButton = pathname === '/mistakes' || pathname === '/' || pathname === '/insights';
 
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/mistakes" className="text-2xl font-bold text-gray-900 hover:text-gray-700">
-            Chess Mistake Journal
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link href="/mistakes" className="text-2xl font-bold text-gray-900 hover:text-gray-700">
+              Chess Mistake Journal
+            </Link>
+            <nav className="flex gap-6">
+              <Link
+                href="/mistakes"
+                className={`text-sm font-medium transition ${
+                  pathname === '/mistakes' || pathname === '/'
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Mistakes
+              </Link>
+              <Link
+                href="/insights"
+                className={`text-sm font-medium transition ${
+                  pathname === '/insights' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Insights
+              </Link>
+            </nav>
+          </div>
           {showImportButton && (
             <Link
               href="/games/new"

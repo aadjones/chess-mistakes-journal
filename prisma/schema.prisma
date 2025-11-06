@@ -40,3 +40,12 @@ model Mistake {
   @@index([primaryTag])
   @@index([createdAt])
 }
+
+model Insight {
+  id               String   @id @default(cuid())
+  content          String   // JSON array of insight objects
+  mistakesAnalyzed Int
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}
