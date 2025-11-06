@@ -44,19 +44,42 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/mistakes
  * List all mistakes with game data (optionally filtered by gameId)
+ * Supports pagination via limit and offset query params
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get('gameId');
+    const tag = searchParams.get('tag');
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const offset = parseInt(searchParams.get('offset') || '0', 10);
 
+    // Build where clause
+    const where: { gameId?: string; primaryTag?: string } = {};
+    if (gameId) where.gameId = gameId;
+    if (tag) where.primaryTag = tag;
+
+    // Get total count for pagination
+    const total = await prisma.mistake.count({ where });
+
+    // Get paginated results
     const mistakes = await prisma.mistake.findMany({
-      where: gameId ? { gameId } : undefined,
+      where,
       include: { game: true },
       orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
     });
 
-    return NextResponse.json({ mistakes });
+    return NextResponse.json({
+      mistakes,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + limit < total,
+      },
+    });
   } catch (error) {
     console.error('Failed to fetch mistakes:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

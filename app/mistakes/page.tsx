@@ -17,11 +17,43 @@ export default function MistakesListPage() {
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [allTags, setAllTags] = useState<string[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalMistakes, setTotalMistakes] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const mistakesPerPage = 20;
 
+  // Load all tags on mount
+  useEffect(() => {
+    async function loadAllTags() {
+      try {
+        // Fetch all mistakes just to get tags (could be optimized with a dedicated endpoint)
+        const response = await fetch('/api/mistakes?limit=1000');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load tags');
+        }
+
+        const tags = Array.from(new Set(data.mistakes.map((m: Mistake) => m.primaryTag)));
+        setAllTags(tags as string[]);
+      } catch (err) {
+        console.error('Failed to load tags:', err);
+      }
+    }
+
+    loadAllTags();
+  }, []);
+
+  // Load mistakes when page or tag changes
   useEffect(() => {
     async function loadMistakes() {
+      setLoading(true);
       try {
-        const response = await fetch('/api/mistakes');
+        const offset = (currentPage - 1) * mistakesPerPage;
+        const tagParam = selectedTag ? `&tag=${encodeURIComponent(selectedTag)}` : '';
+        const response = await fetch(
+          `/api/mistakes?limit=${mistakesPerPage}&offset=${offset}${tagParam}`
+        );
         const data = await response.json();
 
         if (!response.ok) {
@@ -29,11 +61,8 @@ export default function MistakesListPage() {
         }
 
         setMistakes(data.mistakes || []);
-
-        // Extract unique tags
-        const tags = Array.from(new Set(data.mistakes.map((m: Mistake) => m.primaryTag)));
-        setAllTags(tags as string[]);
-
+        setTotalMistakes(data.pagination.total);
+        setHasMore(data.pagination.hasMore);
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -42,7 +71,7 @@ export default function MistakesListPage() {
     }
 
     loadMistakes();
-  }, []);
+  }, [currentPage, selectedTag, mistakesPerPage]);
 
   const handleDelete = async (mistakeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -63,11 +92,12 @@ export default function MistakesListPage() {
 
       // Remove from local state
       setMistakes(prev => prev.filter(m => m.id !== mistakeId));
+      setTotalMistakes(prev => prev - 1);
 
-      // Update tags if needed
-      const remainingMistakes = mistakes.filter(m => m.id !== mistakeId);
-      const tags = Array.from(new Set(remainingMistakes.map(m => m.primaryTag)));
-      setAllTags(tags as string[]);
+      // If we deleted the last item on this page and it's not page 1, go back one page
+      if (mistakes.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete mistake');
     } finally {
@@ -75,14 +105,12 @@ export default function MistakesListPage() {
     }
   };
 
-  const filteredMistakes = selectedTag
-    ? mistakes.filter(m => m.primaryTag === selectedTag)
-    : mistakes;
+  const handleTagSelect = (tag: string) => {
+    setSelectedTag(tag);
+    setCurrentPage(1); // Reset to first page when changing filter
+  };
 
-  const tagCounts = allTags.map(tag => ({
-    tag,
-    count: mistakes.filter(m => m.primaryTag === tag).length,
-  }));
+  const totalPages = Math.ceil(totalMistakes / mistakesPerPage);
 
   if (loading) {
     return (
@@ -107,7 +135,10 @@ export default function MistakesListPage() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">All Mistakes</h1>
-        <p className="text-gray-600">{mistakes.length} mistakes recorded</p>
+        <p className="text-gray-600">
+          {totalMistakes} mistake{totalMistakes !== 1 ? 's' : ''} recorded
+          {selectedTag && ` in ${selectedTag}`}
+        </p>
       </div>
 
       {mistakes.length === 0 ? (
@@ -151,24 +182,24 @@ export default function MistakesListPage() {
               <h3 className="font-semibold mb-3">Filter by Tag</h3>
               <div className="space-y-1">
                 <button
-                  onClick={() => setSelectedTag('')}
+                  onClick={() => handleTagSelect('')}
                   className={`w-full text-left px-3 py-2 rounded transition ${
                     selectedTag === '' ? 'bg-blue-100 font-semibold' : 'hover:bg-gray-100'
                   }`}
                 >
-                  All ({mistakes.length})
+                  All Tags
                 </button>
-                {tagCounts
-                  .sort((a, b) => b.count - a.count)
-                  .map(({ tag, count }) => (
+                {allTags
+                  .sort((a, b) => a.localeCompare(b))
+                  .map(tag => (
                     <button
                       key={tag}
-                      onClick={() => setSelectedTag(tag)}
+                      onClick={() => handleTagSelect(tag)}
                       className={`w-full text-left px-3 py-2 rounded transition ${
                         selectedTag === tag ? 'bg-blue-100 font-semibold' : 'hover:bg-gray-100'
                       }`}
                     >
-                      {tag} ({count})
+                      {tag}
                     </button>
                   ))}
               </div>
@@ -176,80 +207,125 @@ export default function MistakesListPage() {
           </div>
 
           {/* Main Content - Mistake Cards */}
-          <div className="lg:col-span-3 space-y-4">
-            {filteredMistakes.map(mistake => (
-              <div key={mistake.id} className="bg-white rounded-lg shadow p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Chessboard Preview */}
-                  <div className="md:col-span-1">
-                    <div className="max-w-xs mx-auto">
-                      <PlayerChessboard
-                        position={mistake.fenPosition}
-                        playerColor={mistake.game.playerColor}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Mistake Details */}
-                  <div className="md:col-span-2 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg">{mistake.briefDescription}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                            {mistake.primaryTag}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {formatMoveDisplay(mistake.moveIndex)}
-                          </span>
-                        </div>
+          <div className="lg:col-span-3">
+            <div className="space-y-4">
+              {mistakes.map(mistake => (
+                <div key={mistake.id} className="bg-white rounded-lg shadow p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Chessboard Preview */}
+                    <div className="md:col-span-1">
+                      <div className="max-w-xs mx-auto">
+                        <PlayerChessboard
+                          position={mistake.fenPosition}
+                          playerColor={mistake.game.playerColor}
+                        />
                       </div>
                     </div>
 
-                    {mistake.detailedReflection && (
-                      <p className="text-sm text-gray-700 line-clamp-3">
-                        {mistake.detailedReflection}
-                      </p>
-                    )}
+                    {/* Mistake Details */}
+                    <div className="md:col-span-2 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-lg">{mistake.briefDescription}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                              {mistake.primaryTag}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {formatMoveDisplay(mistake.moveIndex)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-                    <div className="pt-2 border-t text-sm text-gray-600">
-                      <p>
-                        <strong>Game:</strong> {mistake.game.playerColor} vs{' '}
-                        {mistake.game.opponentRating
-                          ? `${mistake.game.opponentRating}`
-                          : 'opponent'}
-                        {mistake.game.timeControl &&
-                          ` • ${formatTimeControl(mistake.game.timeControl)}`}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Played{' '}
-                        {mistake.game.datePlayed
-                          ? new Date(mistake.game.datePlayed).toLocaleDateString()
-                          : 'Unknown date'}
-                      </p>
-                    </div>
+                      {mistake.detailedReflection && (
+                        <p className="text-sm text-gray-700 line-clamp-3">
+                          {mistake.detailedReflection}
+                        </p>
+                      )}
 
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        onClick={() =>
-                          router.push(`/games/${mistake.gameId}?moveIndex=${mistake.moveIndex}`)
-                        }
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                      >
-                        View in Game
-                      </button>
-                      <button
-                        onClick={e => handleDelete(mistake.id, e)}
-                        disabled={deletingId === mistake.id}
-                        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-                      >
-                        {deletingId === mistake.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                      <div className="pt-2 border-t text-sm text-gray-600">
+                        <p>
+                          <strong>Game:</strong> {mistake.game.playerColor} vs{' '}
+                          {mistake.game.opponentRating
+                            ? `${mistake.game.opponentRating}`
+                            : 'opponent'}
+                          {mistake.game.timeControl &&
+                            ` • ${formatTimeControl(mistake.game.timeControl)}`}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Played{' '}
+                          {mistake.game.datePlayed
+                            ? new Date(mistake.game.datePlayed).toLocaleDateString()
+                            : 'Unknown date'}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() =>
+                            router.push(`/games/${mistake.gameId}?moveIndex=${mistake.moveIndex}`)
+                          }
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                        >
+                          View in Game
+                        </button>
+                        <button
+                          onClick={e => handleDelete(mistake.id, e)}
+                          disabled={deletingId === mistake.id}
+                          className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                        >
+                          {deletingId === mistake.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-600">
+                  Showing {(currentPage - 1) * mistakesPerPage + 1} to{' '}
+                  {Math.min(currentPage * mistakesPerPage, totalMistakes)} of {totalMistakes}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Previous
+                  </button>
+                  <div className="flex items-center px-3 text-sm">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    disabled={!hasMore}
+                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Last
+                  </button>
+                </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
