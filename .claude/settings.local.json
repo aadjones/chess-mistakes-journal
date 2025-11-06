@@ -34,7 +34,8 @@
       "Bash(timeout 30 npx next build:*)",
       "Bash(npx tsx:*)",
       "Bash(sqlite3:*)",
-      "Bash(npx prisma studio:*)"
+      "Bash(npx prisma studio:*)",
+      "Bash(npm run db:backup:*)"
     ],
     "deny": [],
     "ask": []

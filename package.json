@@ -17,7 +17,8 @@
     "verify": "node scripts/verify-setup.js",
     "prepare": "husky",
     "reset": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && rm -rf .next && echo '✅ Port 3000 cleared and cache removed! Run: npm run dev'",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:backup": "./scripts/backup-db.sh"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
