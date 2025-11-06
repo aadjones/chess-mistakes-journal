@@ -12,13 +12,14 @@ export async function createTestDatabase() {
   const dbUrl = `file:${dbPath}`;
 
   try {
-    execSync('npx prisma migrate deploy', {
+    // Use db push instead of migrate deploy for tests - it's simpler and doesn't track migration history
+    execSync('npx prisma db push --skip-generate', {
       env: { ...process.env, DATABASE_URL: dbUrl },
       stdio: 'pipe',
       cwd: path.join(__dirname, '../..'),
     });
   } catch (error) {
-    console.error('Failed to run migrations:', error);
+    console.error('Failed to setup test database:', error);
     throw error;
   }
 

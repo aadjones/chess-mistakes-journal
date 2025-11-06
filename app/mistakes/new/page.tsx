@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
+import { formatMoveDisplay } from '@/lib/utils/move-math';
 
 export default function NewMistakePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const gameId = searchParams.get('gameId');
-  const moveNumber = searchParams.get('moveNumber');
+  const moveIndex = searchParams.get('moveIndex');
   const fen = searchParams.get('fen');
 
   const [briefDescription, setBriefDescription] = useState('');
@@ -65,7 +66,7 @@ export default function NewMistakePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gameId,
-          moveNumber: parseInt(moveNumber || '0', 10),
+          moveIndex: parseInt(moveIndex || '0', 10),
           fenPosition: fen,
           briefDescription,
           primaryTag,
@@ -79,8 +80,8 @@ export default function NewMistakePage() {
         throw new Error(data.error || 'Failed to create mistake');
       }
 
-      // Redirect back to the game viewer
-      router.push(`/games/${gameId}`);
+      // Redirect back to the game viewer at the mistake position
+      router.push(`/games/${gameId}?moveIndex=${moveIndex}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
@@ -96,7 +97,7 @@ export default function NewMistakePage() {
     setShowTagSuggestions(false);
   };
 
-  if (!gameId || !moveNumber || !fen) {
+  if (!gameId || !moveIndex || !fen) {
     return (
       <div className="max-w-4xl mx-auto mt-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -125,7 +126,7 @@ export default function NewMistakePage() {
           ← Back to Game
         </button>
         <h1 className="text-2xl font-bold mb-2">Record Mistake</h1>
-        <p className="text-gray-600">Move {moveNumber}</p>
+        <p className="text-gray-600">{formatMoveDisplay(parseInt(moveIndex))}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

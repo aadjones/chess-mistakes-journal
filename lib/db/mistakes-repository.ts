@@ -7,7 +7,7 @@ import type { Mistake, CreateMistakeInput, UpdateMistakeInput } from '@/types/mi
 function toDomainMistake(prismaMistake: {
   id: string;
   gameId: string;
-  moveNumber: number;
+  moveIndex: number;
   fenPosition: string;
   briefDescription: string;
   primaryTag: string;
@@ -18,7 +18,7 @@ function toDomainMistake(prismaMistake: {
   return {
     id: prismaMistake.id,
     gameId: prismaMistake.gameId,
-    moveNumber: prismaMistake.moveNumber,
+    moveIndex: prismaMistake.moveIndex,
     fenPosition: prismaMistake.fenPosition,
     briefDescription: prismaMistake.briefDescription,
     primaryTag: prismaMistake.primaryTag,
@@ -38,7 +38,7 @@ export async function createMistake(
   const mistake = await prisma.mistake.create({
     data: {
       gameId: input.gameId,
-      moveNumber: input.moveNumber,
+      moveIndex: input.moveIndex,
       fenPosition: input.fenPosition,
       briefDescription: input.briefDescription,
       primaryTag: input.primaryTag,
@@ -61,7 +61,7 @@ export async function getMistakeById(prisma: PrismaClient, id: string): Promise<
 }
 
 /**
- * Get all mistakes for a specific game (ordered by move number)
+ * Get all mistakes for a specific game (ordered by move index)
  */
 export async function getMistakesByGameId(
   prisma: PrismaClient,
@@ -69,7 +69,7 @@ export async function getMistakesByGameId(
 ): Promise<Mistake[]> {
   const mistakes = await prisma.mistake.findMany({
     where: { gameId },
-    orderBy: { moveNumber: 'asc' },
+    orderBy: { moveIndex: 'asc' },
   });
 
   return mistakes.map(toDomainMistake);

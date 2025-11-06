@@ -1,7 +1,7 @@
 export interface Mistake {
   id: string;
   gameId: string;
-  moveNumber: number;
+  moveIndex: number;
   fenPosition: string;
   briefDescription: string;
   primaryTag: string;
@@ -12,7 +12,7 @@ export interface Mistake {
 
 export interface CreateMistakeInput {
   gameId: string;
-  moveNumber: number;
+  moveIndex: number;
   fenPosition: string;
   briefDescription: string;
   primaryTag: string;

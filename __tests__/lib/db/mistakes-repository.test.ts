@@ -21,7 +21,7 @@ const createTestMistakeInput = (
   overrides?: Partial<CreateMistakeInput>
 ): CreateMistakeInput => ({
   gameId,
-  moveNumber: 10,
+  moveIndex: 19,
   fenPosition: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   briefDescription: 'Missed a tactic',
   primaryTag: 'calculation',
@@ -55,7 +55,7 @@ describe('mistakes-repository', () => {
 
       expect(mistake.id).toBeDefined();
       expect(mistake.gameId).toBe(game.id);
-      expect(mistake.moveNumber).toBe(input.moveNumber);
+      expect(mistake.moveIndex).toBe(input.moveIndex);
       expect(mistake.fenPosition).toBe(input.fenPosition);
       expect(mistake.briefDescription).toBe(input.briefDescription);
       expect(mistake.primaryTag).toBe(input.primaryTag);
@@ -114,26 +114,26 @@ describe('mistakes-repository', () => {
 
     it('should return all mistakes for a game', async () => {
       const game = await createTestGame();
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 10 }));
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 15 }));
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 20 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 19 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 29 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 39 }));
 
       const mistakes = await mistakesRepo.getMistakesByGameId(prisma, game.id);
 
       expect(mistakes).toHaveLength(3);
     });
 
-    it('should return mistakes ordered by move number', async () => {
+    it('should return mistakes ordered by move index', async () => {
       const game = await createTestGame();
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 20 }));
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 10 }));
-      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveNumber: 15 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 39 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 19 }));
+      await mistakesRepo.createMistake(prisma, createTestMistakeInput(game.id, { moveIndex: 29 }));
 
       const mistakes = await mistakesRepo.getMistakesByGameId(prisma, game.id);
 
-      expect(mistakes[0].moveNumber).toBe(10);
-      expect(mistakes[1].moveNumber).toBe(15);
-      expect(mistakes[2].moveNumber).toBe(20);
+      expect(mistakes[0].moveIndex).toBe(19);
+      expect(mistakes[1].moveIndex).toBe(29);
+      expect(mistakes[2].moveIndex).toBe(39);
     });
 
     it('should not return mistakes from other games', async () => {

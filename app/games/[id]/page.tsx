@@ -16,6 +16,7 @@ export default function GameViewerPage() {
   const searchParams = useSearchParams();
   const gameId = params.id as string;
   const targetMoveNumber = searchParams.get('move');
+  const targetMoveIndex = searchParams.get('moveIndex');
 
   const [game, setGame] = useState<GameWithMistakes | null>(null);
   const [chessGame, setChessGame] = useState(new Chess());
@@ -63,31 +64,38 @@ export default function GameViewerPage() {
 
   // Navigate to target move if specified in URL
   useEffect(() => {
-    if (targetMoveNumber && moves.length > 0 && game) {
-      const moveNum = parseInt(targetMoveNumber);
-      if (!isNaN(moveNum) && moveNum > 0) {
-        // Find the move index that corresponds to this move number
-        // We need to find which half-move (white or black) matches the mistake
-        // Since mistakes are recorded at currentMoveIndex, we need to find all indices
-        // where Math.floor(index / 2) + 1 === moveNum
-        // This could be either (moveNum - 1) * 2 or (moveNum - 1) * 2 + 1
-
-        // Check which color the player is and navigate to their move
-        let targetIndex;
-        if (game.playerColor === 'white') {
-          // White's move is at even indices: 0, 2, 4, ...
-          targetIndex = (moveNum - 1) * 2;
-        } else {
-          // Black's move is at odd indices: 1, 3, 5, ...
-          targetIndex = (moveNum - 1) * 2 + 1;
+    if (moves.length > 0 && game) {
+      // Prioritize moveIndex if present (exact position)
+      if (targetMoveIndex) {
+        const index = parseInt(targetMoveIndex);
+        if (!isNaN(index) && index >= 0) {
+          const targetIndex = Math.min(index, moves.length);
+          goToMove(targetIndex);
+          return;
         }
+      }
 
-        // Make sure we don't go past the end of the game
-        targetIndex = Math.min(targetIndex, moves.length);
-        goToMove(targetIndex);
+      // Fall back to move number (for backward compatibility with "View in Game" links)
+      if (targetMoveNumber) {
+        const moveNum = parseInt(targetMoveNumber);
+        if (!isNaN(moveNum) && moveNum > 0) {
+          // Check which color the player is and navigate to their move
+          let targetIndex;
+          if (game.playerColor === 'white') {
+            // White's move is at even indices: 0, 2, 4, ...
+            targetIndex = (moveNum - 1) * 2;
+          } else {
+            // Black's move is at odd indices: 1, 3, 5, ...
+            targetIndex = (moveNum - 1) * 2 + 1;
+          }
+
+          // Make sure we don't go past the end of the game
+          targetIndex = Math.min(targetIndex, moves.length);
+          goToMove(targetIndex);
+        }
       }
     }
-  }, [targetMoveNumber, moves.length, game]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [targetMoveNumber, targetMoveIndex, moves.length, game]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goToMove = (moveIndex: number) => {
     const newGame = new Chess();
@@ -129,16 +137,14 @@ export default function GameViewerPage() {
   const handleAddMistake = () => {
     // Navigate to mistake form with current position context
     const fenPosition = chessGame.fen();
-    const moveNumber = getMoveNumber(currentMoveIndex);
     router.push(
-      `/mistakes/new?gameId=${gameId}&moveNumber=${moveNumber}&fen=${encodeURIComponent(fenPosition)}`
+      `/mistakes/new?gameId=${gameId}&moveIndex=${currentMoveIndex}&fen=${encodeURIComponent(fenPosition)}`
     );
   };
 
   const getMistakeAtCurrentMove = () => {
     if (!game) return null;
-    const moveNumber = getMoveNumber(currentMoveIndex);
-    return game.mistakes.find(m => m.moveNumber === moveNumber);
+    return game.mistakes.find(m => m.moveIndex === currentMoveIndex);
   };
 
   if (loading) {
@@ -299,19 +305,24 @@ export default function GameViewerPage() {
                     const blackIndex = i * 2 + 1;
                     const whiteMove = moves[whiteIndex];
                     const blackMove = moves[blackIndex];
-                    const hasMistake = game.mistakes.some(m => m.moveNumber === moveNum);
+                    const whiteMoveIndex = whiteIndex + 1;
+                    const blackMoveIndex = blackIndex + 1;
+                    const whiteMistake = game.mistakes.find(m => m.moveIndex === whiteMoveIndex);
+                    const blackMistake = blackMove
+                      ? game.mistakes.find(m => m.moveIndex === blackMoveIndex)
+                      : null;
 
                     return (
-                      <tr key={moveNum} className={hasMistake ? 'border-l-2 border-red-500' : ''}>
+                      <tr key={moveNum}>
                         <td className="px-1 py-0.5 text-gray-500 text-right font-mono text-xs">
                           {moveNum}.
                         </td>
                         <td className="px-1 py-0.5">
                           <button
-                            onClick={() => goToMove(whiteIndex + 1)}
+                            onClick={() => goToMove(whiteMoveIndex)}
                             className={`px-1.5 py-0.5 rounded text-xs transition hover:bg-gray-100 ${
-                              currentMoveIndex === whiteIndex + 1 ? 'bg-blue-100 font-semibold' : ''
-                            }`}
+                              currentMoveIndex === whiteMoveIndex ? 'bg-blue-100 font-semibold' : ''
+                            } ${whiteMistake ? 'bg-red-100 text-red-900 font-semibold' : ''}`}
                           >
                             {whiteMove}
                           </button>
@@ -319,12 +330,12 @@ export default function GameViewerPage() {
                         <td className="px-1 py-0.5">
                           {blackMove && (
                             <button
-                              onClick={() => goToMove(blackIndex + 1)}
+                              onClick={() => goToMove(blackMoveIndex)}
                               className={`px-1.5 py-0.5 rounded text-xs transition hover:bg-gray-100 ${
-                                currentMoveIndex === blackIndex + 1
+                                currentMoveIndex === blackMoveIndex
                                   ? 'bg-blue-100 font-semibold'
                                   : ''
-                              }`}
+                              } ${blackMistake ? 'bg-red-100 text-red-900 font-semibold' : ''}`}
                             >
                               {blackMove}
                             </button>

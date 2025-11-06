@@ -114,7 +114,7 @@ describe('games-repository', () => {
       await prisma.mistake.create({
         data: {
           gameId: created.id,
-          moveNumber: 10,
+          moveIndex: 19,
           fenPosition: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           briefDescription: 'Test mistake',
           primaryTag: 'calculation',
@@ -173,7 +173,7 @@ describe('games-repository', () => {
       const mistake = await prisma.mistake.create({
         data: {
           gameId: created.id,
-          moveNumber: 10,
+          moveIndex: 19,
           fenPosition: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           briefDescription: 'Test mistake',
           primaryTag: 'calculation',

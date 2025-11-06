@@ -31,7 +31,7 @@ function toDomainGame(prismaGame: {
 function toDomainMistake(prismaMistake: {
   id: string;
   gameId: string;
-  moveNumber: number;
+  moveIndex: number;
   fenPosition: string;
   briefDescription: string;
   primaryTag: string;
@@ -42,7 +42,7 @@ function toDomainMistake(prismaMistake: {
   return {
     id: prismaMistake.id,
     gameId: prismaMistake.gameId,
-    moveNumber: prismaMistake.moveNumber,
+    moveIndex: prismaMistake.moveIndex,
     fenPosition: prismaMistake.fenPosition,
     briefDescription: prismaMistake.briefDescription,
     primaryTag: prismaMistake.primaryTag,
@@ -91,7 +91,7 @@ export async function getGameWithMistakes(
     where: { id },
     include: {
       mistakes: {
-        orderBy: { moveNumber: 'asc' },
+        orderBy: { moveIndex: 'asc' },
       },
     },
   });

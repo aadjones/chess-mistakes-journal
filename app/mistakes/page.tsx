@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
 import { formatTimeControl } from '@/lib/utils/format-time-control';
+import { formatMoveDisplay } from '@/lib/utils/move-math';
 import type { Mistake, Game } from '@prisma/client';
 
 type MistakeWithGame = Mistake & { game: Game };
@@ -198,7 +199,9 @@ export default function MistakesListPage() {
                           <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
                             {mistake.primaryTag}
                           </span>
-                          <span className="text-sm text-gray-500">Move {mistake.moveNumber}</span>
+                          <span className="text-sm text-gray-500">
+                            {formatMoveDisplay(mistake.moveIndex)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -226,7 +229,7 @@ export default function MistakesListPage() {
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={() =>
-                          router.push(`/games/${mistake.gameId}?move=${mistake.moveNumber}`)
+                          router.push(`/games/${mistake.gameId}?moveIndex=${mistake.moveIndex}`)
                         }
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                       >
