@@ -45,6 +45,7 @@ model Insight {
   id               String   @id @default(cuid())
   content          String   // JSON array of insight objects
   mistakesAnalyzed Int
+  mistakeIdsMap    String?  // JSON array of mistake IDs in order (for reference lookups)
   createdAt        DateTime @default(now())
 
   @@index([createdAt])

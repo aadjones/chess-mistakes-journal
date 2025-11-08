@@ -109,8 +109,8 @@ export default function NewGamePage() {
         <h3 className="font-semibold text-blue-900 mb-2">How to get PGN:</h3>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>
-            <strong>Lichess:</strong> Open your game → Click the three dots → &quot;Export
-            game&quot; → Copy PGN
+            <strong>Lichess:</strong> Open your game → Click &quot;Analysis board&quot; → Scroll
+            down → Click &quot;Copy PGN to clipboard&quot;
           </li>
           <li>
             <strong>Chess.com:</strong> Open your game → Click &quot;Share&quot; → &quot;PGN&quot; →

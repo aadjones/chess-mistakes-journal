@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     const mistakes = await prisma.mistake.findMany({
       where,
       include: { game: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { game: { datePlayed: 'desc' } },
       take: limit,
       skip: offset,
     });

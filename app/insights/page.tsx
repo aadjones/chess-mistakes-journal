@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { InsightLoadingSpinner } from '@/components/InsightLoadingSpinner';
+import { MistakeHoverTooltip } from '@/components/MistakeHoverTooltip';
+import { MistakeStatsCards } from '@/components/MistakeStatsCards';
 
 interface Insight {
   title: string;
@@ -13,7 +15,13 @@ interface InsightRecord {
   id: string;
   insights: Insight[];
   mistakesAnalyzed: number;
+  mistakeIdsMap: string[];
   generatedAt: string;
+}
+
+interface TagStats {
+  tag: string;
+  count: number;
 }
 
 export default function InsightsPage() {
@@ -25,11 +33,14 @@ export default function InsightsPage() {
     mistakesAnalyzed: number;
     generatedAt: string;
   } | null>(null);
+  const [mistakeIdsMap, setMistakeIdsMap] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [stats, setStats] = useState<TagStats[]>([]);
 
-  // Load insights on mount
+  // Load insights and stats on mount
   useEffect(() => {
     loadInsights();
+    loadStats();
   }, []);
 
   const loadInsights = async () => {
@@ -44,10 +55,21 @@ export default function InsightsPage() {
           mistakesAnalyzed: latest.mistakesAnalyzed,
           generatedAt: latest.generatedAt,
         });
+        setMistakeIdsMap(latest.mistakeIdsMap || []);
         setHistory(data.insights);
       }
     } catch (err) {
       console.error('Failed to load insights:', err);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const response = await fetch('/api/stats');
+      const data = await response.json();
+      setStats(data.topTags || []);
+    } catch (err) {
+      console.error('Failed to load stats:', err);
     }
   };
 
@@ -81,6 +103,45 @@ export default function InsightsPage() {
     }
   };
 
+  // Helper to parse description text and wrap mistake references with tooltips
+  const parseDescription = (description: string) => {
+    // Match patterns like "#4", "#10", "mistake 4", "mistakes #4, #10, #26", etc.
+    // This regex captures individual mistake references
+    const parts = description.split(/((?:mistakes?\s+)?#\d+|mistake\s+\d+|\(mistake\s+\d+\))/gi);
+
+    return parts.map((part, idx) => {
+      // Try to extract mistake number from various formats
+      let mistakeNumber: number | null = null;
+
+      // Pattern: #4, #10, etc. (standalone or in "mistakes #4, #10")
+      let match = part.match(/#(\d+)/);
+      if (match) {
+        mistakeNumber = parseInt(match[1], 10);
+      }
+
+      // Pattern: mistake 4, mistake 10, etc.
+      if (!mistakeNumber) {
+        match = part.match(/mistake\s+(\d+)/i);
+        if (match) {
+          mistakeNumber = parseInt(match[1], 10);
+        }
+      }
+
+      if (mistakeNumber) {
+        const mistakeId = mistakeIdsMap[mistakeNumber - 1]; // Convert 1-indexed to 0-indexed
+
+        if (mistakeId) {
+          return (
+            <MistakeHoverTooltip key={idx} mistakeId={mistakeId}>
+              {part}
+            </MistakeHoverTooltip>
+          );
+        }
+      }
+      return <span key={idx}>{part}</span>;
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -89,6 +150,9 @@ export default function InsightsPage() {
           Discover patterns and themes in your chess mistakes using AI analysis
         </p>
       </div>
+
+      {/* Stats Cards - Top Patterns */}
+      {stats.length > 0 && <MistakeStatsCards stats={stats} />}
 
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -165,7 +229,9 @@ export default function InsightsPage() {
                     {insight.mistakeCount} {insight.mistakeCount === 1 ? 'mistake' : 'mistakes'}
                   </span>
                 </div>
-                <p className="text-gray-700 leading-relaxed">{insight.description}</p>
+                <p className="text-gray-700 leading-relaxed">
+                  {parseDescription(insight.description)}
+                </p>
               </div>
             ))}
           </div>

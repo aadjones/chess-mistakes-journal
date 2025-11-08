@@ -22,6 +22,7 @@ export async function GET(request: Request) {
         id: insight.id,
         insights: JSON.parse(insight.content),
         mistakesAnalyzed: insight.mistakesAnalyzed,
+        mistakeIdsMap: insight.mistakeIdsMap ? JSON.parse(insight.mistakeIdsMap) : [],
         generatedAt: insight.createdAt.toISOString(),
       })),
     });

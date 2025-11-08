@@ -65,12 +65,13 @@ Identify 3-5 recurring patterns or themes based ONLY on what the player explicit
 3. Look for emotional patterns, thought process issues, or subtle themes they might not see
 4. Be specific but concise
 5. Focus on actionable insights
+6. When referencing specific mistakes, use the format "mistakes #1, #5, #10" (with the word "mistakes" plural, followed by hash numbers)
 
 Return your analysis as a JSON array of insight objects with this structure:
 [
   {
     "title": "Brief pattern name (5-8 words)",
-    "description": "Detailed explanation with quotes (2-3 sentences)",
+    "description": "Detailed explanation with quotes (2-3 sentences). When citing examples, use format: 'in mistakes #4, #10, #26 they note...'",
     "mistakeCount": number of mistakes showing this pattern
   }
 ]
@@ -93,13 +94,52 @@ Return ONLY the JSON array, no other text.`,
       );
     }
 
-    const insights = JSON.parse(jsonMatch[0]);
+    let insights;
+    try {
+      insights = JSON.parse(jsonMatch[0]);
+    } catch (parseError) {
+      console.error('Failed to parse JSON:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON in AI response' }, { status: 500 });
+    }
+
+    // Validate structure
+    if (!Array.isArray(insights)) {
+      console.error('Expected array of insights, got:', typeof insights);
+      return NextResponse.json({ error: 'Expected array of insights from AI' }, { status: 500 });
+    }
+
+    // Validate each insight object
+    for (let i = 0; i < insights.length; i++) {
+      const insight = insights[i];
+      if (!insight.title || typeof insight.title !== 'string') {
+        console.error(`Insight ${i} missing or invalid title:`, insight);
+        return NextResponse.json({ error: `Insight ${i + 1} has invalid title` }, { status: 500 });
+      }
+      if (!insight.description || typeof insight.description !== 'string') {
+        console.error(`Insight ${i} missing or invalid description:`, insight);
+        return NextResponse.json(
+          { error: `Insight ${i + 1} has invalid description` },
+          { status: 500 }
+        );
+      }
+      if (typeof insight.mistakeCount !== 'number') {
+        console.error(`Insight ${i} missing or invalid mistakeCount:`, insight);
+        return NextResponse.json(
+          { error: `Insight ${i + 1} has invalid mistakeCount` },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Create mistake IDs map (index 0 = mistake ID at position 0, etc.)
+    const mistakeIdsMap = mistakes.map(m => m.id);
 
     // Save insights to database
     const savedInsight = await prisma.insight.create({
       data: {
         content: JSON.stringify(insights),
         mistakesAnalyzed: mistakes.length,
+        mistakeIdsMap: JSON.stringify(mistakeIdsMap),
       },
     });
 

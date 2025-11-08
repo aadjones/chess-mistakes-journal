@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
 import { formatTimeControl } from '@/lib/utils/format-time-control';
 import { formatMoveDisplay } from '@/lib/utils/move-math';
@@ -9,39 +9,46 @@ import type { Mistake, Game } from '@prisma/client';
 
 type MistakeWithGame = Mistake & { game: Game };
 
+interface TagStat {
+  tag: string;
+  count: number;
+}
+
 export default function MistakesListPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedTag = searchParams.get('tag') || '';
   const [mistakes, setMistakes] = useState<MistakeWithGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string>('');
   const [allTags, setAllTags] = useState<string[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalMistakes, setTotalMistakes] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const mistakesPerPage = 20;
+  const [stats, setStats] = useState<TagStat[]>([]);
+  const mistakesPerPage = 10;
 
-  // Load all tags on mount
+  // Load stats and tags on mount
   useEffect(() => {
-    async function loadAllTags() {
+    async function loadStatsAndTags() {
       try {
-        // Fetch all mistakes just to get tags (could be optimized with a dedicated endpoint)
-        const response = await fetch('/api/mistakes?limit=1000');
-        const data = await response.json();
+        // Fetch stats
+        const statsResponse = await fetch('/api/stats');
+        const statsData = await statsResponse.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to load tags');
+        if (statsResponse.ok) {
+          setStats(statsData.topTags || []);
+          // Extract unique tags from stats for filtering
+          const tags = statsData.topTags.map((t: TagStat) => t.tag);
+          setAllTags(tags);
         }
-
-        const tags = Array.from(new Set(data.mistakes.map((m: Mistake) => m.primaryTag)));
-        setAllTags(tags as string[]);
       } catch (err) {
-        console.error('Failed to load tags:', err);
+        console.error('Failed to load stats:', err);
       }
     }
 
-    loadAllTags();
+    loadStatsAndTags();
   }, []);
 
   // Load mistakes when page or tag changes
@@ -106,7 +113,13 @@ export default function MistakesListPage() {
   };
 
   const handleTagSelect = (tag: string) => {
-    setSelectedTag(tag);
+    const params = new URLSearchParams(searchParams.toString());
+    if (tag) {
+      params.set('tag', tag);
+    } else {
+      params.delete('tag');
+    }
+    router.push(`/mistakes?${params.toString()}`);
     setCurrentPage(1); // Reset to first page when changing filter
   };
 
@@ -134,10 +147,9 @@ export default function MistakesListPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">All Mistakes</h1>
+        <h1 className="text-2xl font-bold mb-2">{selectedTag ? selectedTag : 'All Mistakes'}</h1>
         <p className="text-gray-600">
           {totalMistakes} mistake{totalMistakes !== 1 ? 's' : ''} recorded
-          {selectedTag && ` in ${selectedTag}`}
         </p>
       </div>
 
@@ -181,28 +193,55 @@ export default function MistakesListPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-4 sticky top-4">
               <h3 className="font-semibold mb-3">Filter by Tag</h3>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <button
                   onClick={() => handleTagSelect('')}
-                  className={`w-full text-left px-3 py-2 rounded transition ${
-                    selectedTag === '' ? 'bg-blue-100 font-semibold' : 'hover:bg-gray-100'
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded transition
+                    ${
+                      selectedTag === ''
+                        ? 'border-l-4 border-blue-600 font-semibold bg-blue-50/30'
+                        : 'border-l-4 border-transparent hover:bg-gray-100'
+                    }`}
                 >
                   All Tags
                 </button>
-                {allTags
-                  .sort((a, b) => a.localeCompare(b))
-                  .map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => handleTagSelect(tag)}
-                      className={`w-full text-left px-3 py-2 rounded transition ${
-                        selectedTag === tag ? 'bg-blue-100 font-semibold' : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                {stats
+                  .sort((a, b) => b.count - a.count)
+                  .map(stat => {
+                    const maxCount = stats[0]?.count || 1;
+                    const barWidth = (stat.count / maxCount) * 100;
+                    const isSelected = selectedTag === stat.tag;
+
+                    return (
+                      <button
+                        key={stat.tag}
+                        onClick={() => handleTagSelect(stat.tag)}
+                        className={`w-full text-left px-3 py-2 rounded transition relative overflow-hidden
+                          ${
+                            isSelected
+                              ? 'border-l-4 border-blue-600 font-semibold bg-blue-50/30'
+                              : 'border-l-4 border-transparent hover:bg-gray-100'
+                          }`}
+                      >
+                        {/* Background bar - always visible */}
+                        <div
+                          className="absolute inset-y-0 left-0 bg-blue-100 transition-all"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                        {/* Tag name and count */}
+                        <div className="flex items-center justify-between relative z-10">
+                          <span className="text-sm">{stat.tag}</span>
+                          <span
+                            className={`text-xs ml-2 font-normal
+                            ${isSelected ? 'text-blue-700 font-semibold' : 'text-gray-500'}
+                          `}
+                          >
+                            {stat.count}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           </div>
