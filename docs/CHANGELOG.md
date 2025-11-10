@@ -1,4 +1,4 @@
-# Changelog
+# changelog
 
 ## 2025-11-05 - Phase 1 Complete
 
