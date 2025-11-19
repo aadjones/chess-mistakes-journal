@@ -7,8 +7,10 @@ const prisma = new PrismaClient();
 /**
  * POST /api/insights/generate
  * Generate insights from recent mistakes using Claude API
+ * Query params:
+ *   - limit: number of mistakes to analyze (default: 50, use 0 or 'all' for all mistakes)
  */
-export async function POST() {
+export async function POST(request: Request) {
   try {
     // Check for API key
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -22,9 +24,15 @@ export async function POST() {
       );
     }
 
-    // Fetch recent mistakes (last 50, with game data)
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get('limit');
+    const useAllMistakes = limitParam === 'all' || limitParam === '0';
+    const limit = useAllMistakes ? undefined : parseInt(limitParam || '50', 10);
+
+    // Fetch recent mistakes (with game data)
     const mistakes = await prisma.mistake.findMany({
-      take: 50,
+      ...(limit ? { take: limit } : {}),
       orderBy: { createdAt: 'desc' },
       include: { game: true },
     });

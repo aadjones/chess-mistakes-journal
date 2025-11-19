@@ -73,12 +73,13 @@ export default function InsightsPage() {
     }
   };
 
-  const generateInsights = async () => {
+  const generateInsights = async (limit?: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/insights/generate', {
+      const url = limit ? `/api/insights/generate?limit=${limit}` : '/api/insights/generate';
+      const response = await fetch(url, {
         method: 'POST',
       });
 
@@ -182,19 +183,26 @@ export default function InsightsPage() {
           </div>
           <h2 className="text-xl font-semibold mb-2">Generate Your First Insights</h2>
           <p className="text-gray-600 mb-6">
-            Click the button below to analyze your recent mistakes and discover patterns in your
-            play. The AI will look for themes in your own words and reflections.
+            Choose how many mistakes to analyze. The AI will look for themes in your own words and
+            reflections.
           </p>
-          <button
-            onClick={generateInsights}
-            disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
-          >
-            Generate Insights
-          </button>
-          <p className="text-sm text-gray-500 mt-4">
-            This analyzes your last 50 mistakes and may take 10-30 seconds
-          </p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => generateInsights('50')}
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+            >
+              Last 50 Games
+            </button>
+            <button
+              onClick={() => generateInsights('all')}
+              disabled={loading}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+            >
+              All Games
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">Analysis may take 10-30 seconds</p>
         </div>
       ) : (
         <div>
@@ -210,13 +218,22 @@ export default function InsightsPage() {
                   minute: '2-digit',
                 })}
             </div>
-            <button
-              onClick={generateInsights}
-              disabled={loading}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Regenerating...' : 'Regenerate'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => generateInsights('50')}
+                disabled={loading}
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              >
+                {loading ? 'Generating...' : 'Last 50'}
+              </button>
+              <button
+                onClick={() => generateInsights('all')}
+                disabled={loading}
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              >
+                {loading ? 'Generating...' : 'All Games'}
+              </button>
+            </div>
           </div>
 
           {/* Current Insights */}
