@@ -6,6 +6,9 @@ import { Header } from '@/components/Header';
 export const metadata: Metadata = {
   title: 'Chess Mistake Journal',
   description: 'Track and analyze your chess mistakes to improve faster',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
