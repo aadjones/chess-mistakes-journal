@@ -20,6 +20,12 @@ export async function createTestDatabase() {
   fs.writeFileSync(testSchemaPath, testSchema);
 
   try {
+    // Generate Prisma Client with SQLite provider
+    execSync('npx prisma generate --schema=./prisma/schema-test.prisma', {
+      stdio: 'pipe',
+      cwd: path.join(__dirname, '../..'),
+    });
+
     // Use db push instead of migrate deploy for tests - it's simpler and doesn't track migration history
     execSync('npx prisma db push --skip-generate --schema=./prisma/schema-test.prisma', {
       env: { ...process.env, DATABASE_URL: dbUrl },
