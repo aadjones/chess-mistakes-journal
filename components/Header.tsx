@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const showImportButton = pathname === '/mistakes' || pathname === '/' || pathname === '/insights';
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  };
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -36,14 +43,22 @@ export function Header() {
               </Link>
             </nav>
           </div>
-          {showImportButton && (
-            <Link
-              href="/games/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          <div className="flex items-center gap-4">
+            {showImportButton && (
+              <Link
+                href="/games/new"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Import Game
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-600 hover:text-gray-900 transition"
             >
-              Import Game
-            </Link>
-          )}
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </header>

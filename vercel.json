@@ -1,0 +1,9 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "env": {
+    "DATABASE_URL": "@postgres-url",
+    "ANTHROPIC_API_KEY": "@anthropic-api-key",
+    "SITE_PASSWORD": "@site-password",
+    "SESSION_SECRET": "@session-secret"
+  }
+}
