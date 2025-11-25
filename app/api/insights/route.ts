@@ -18,13 +18,32 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({
-      insights: insights.map(insight => ({
-        id: insight.id,
-        insights: JSON.parse(insight.content),
-        mistakesAnalyzed: insight.mistakesAnalyzed,
-        mistakeIdsMap: insight.mistakeIdsMap ? JSON.parse(insight.mistakeIdsMap) : [],
-        generatedAt: insight.createdAt.toISOString(),
-      })),
+      insights: insights.map(insight => {
+        // Handle mistakeIdsMap which could be:
+        // 1. null/undefined
+        // 2. A JSON array string
+        // 3. A timestamp string (old data)
+        let mistakeIdsMap: string[] = [];
+        if (insight.mistakeIdsMap) {
+          try {
+            const parsed = JSON.parse(insight.mistakeIdsMap);
+            // If it's an array, use it; otherwise ignore (it's a timestamp)
+            if (Array.isArray(parsed)) {
+              mistakeIdsMap = parsed;
+            }
+          } catch {
+            // If parse fails, it might be a plain timestamp string, ignore it
+          }
+        }
+
+        return {
+          id: insight.id,
+          insights: JSON.parse(insight.content),
+          mistakesAnalyzed: insight.mistakesAnalyzed,
+          mistakeIdsMap,
+          generatedAt: insight.createdAt.toISOString(),
+        };
+      }),
     });
   } catch (error) {
     console.error('Failed to fetch insights:', error);

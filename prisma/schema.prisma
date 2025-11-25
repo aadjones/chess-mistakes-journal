@@ -12,7 +12,7 @@ datasource db {
 
 model Game {
   id              String    @id @default(cuid())
-  pgn             String    @unique
+  pgn             String
   playerColor     String    // "white" or "black"
   opponentRating  Int?
   timeControl     String?

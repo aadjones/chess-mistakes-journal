@@ -40,7 +40,8 @@
       "Bash(tree:*)",
       "Bash(python3:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(export:*)"
     ],
     "deny": [],
     "ask": []
