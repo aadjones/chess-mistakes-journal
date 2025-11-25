@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
 import { formatTimeControl } from '@/lib/utils/format-time-control';
@@ -14,7 +14,7 @@ interface TagStat {
   count: number;
 }
 
-export default function MistakesListPage() {
+function MistakesListContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedTag = searchParams.get('tag') || '';
@@ -370,5 +370,19 @@ export default function MistakesListPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MistakesListPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-lg text-gray-600">Loading mistakes...</div>
+        </div>
+      }
+    >
+      <MistakesListContent />
+    </Suspense>
   );
 }
