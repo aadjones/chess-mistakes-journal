@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PlayerChessboard } from '@/components/PlayerChessboard';
 import { formatMoveDisplay } from '@/lib/utils/move-math';
 
-export default function NewMistakePage() {
+function NewMistakeForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -252,5 +252,19 @@ What would you need to think about differently next time?"
         </ul>
       </div>
     </div>
+  );
+}
+
+export default function NewMistakePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-lg text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <NewMistakeForm />
+    </Suspense>
   );
 }
