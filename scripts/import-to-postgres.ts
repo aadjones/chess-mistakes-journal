@@ -178,6 +178,14 @@ function parseInsertValues(insert: string): string[] | null {
     }
 
     if (char === "'") {
+      // Check if this is an escaped quote (two single quotes in a row)
+      if (inString && i + 1 < valuesStr.length && valuesStr[i + 1] === "'") {
+        // This is an escaped quote - add a single quote to current and skip the next one
+        current += "'";
+        i++; // Skip the next quote
+        continue;
+      }
+      // Otherwise, this is a string delimiter
       inString = !inString;
       continue;
     }
