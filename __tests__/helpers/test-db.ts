@@ -11,22 +11,8 @@ export async function createTestDatabase() {
   const dbPath = path.join(dbDir, `test-${randomUUID()}.db`);
   const dbUrl = `file:${dbPath}`;
 
-  // Create a temporary schema file for SQLite tests
-  const schemaPath = path.join(__dirname, '../../prisma/schema.prisma');
-  const testSchemaPath = path.join(__dirname, '../../prisma/schema-test.prisma');
-
-  const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
-  const testSchema = schemaContent.replace('provider = "postgresql"', 'provider = "sqlite"');
-  fs.writeFileSync(testSchemaPath, testSchema);
-
   try {
-    // Generate Prisma Client with SQLite provider
-    execSync('npx prisma generate --schema=./prisma/schema-test.prisma', {
-      stdio: 'pipe',
-      cwd: path.join(__dirname, '../..'),
-    });
-
-    // Use db push instead of migrate deploy for tests - it's simpler and doesn't track migration history
+    // Use db push to create the SQLite database schema (schema was generated in setup.ts)
     execSync('npx prisma db push --skip-generate --schema=./prisma/schema-test.prisma', {
       env: { ...process.env, DATABASE_URL: dbUrl },
       stdio: 'pipe',
@@ -34,15 +20,7 @@ export async function createTestDatabase() {
     });
   } catch (error) {
     console.error('Failed to setup test database:', error);
-    fs.unlinkSync(testSchemaPath);
     throw error;
-  } finally {
-    // Clean up the temporary schema file
-    try {
-      fs.unlinkSync(testSchemaPath);
-    } catch {
-      // Ignore
-    }
   }
 
   const prisma = new PrismaClient({
