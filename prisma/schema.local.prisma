@@ -1,0 +1,52 @@
+// Local development schema using SQLite
+// Use: npx prisma db push --schema=prisma/schema.local.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id              String    @id @default(cuid())
+  pgn             String
+  playerColor     String    // "white" or "black"
+  opponentRating  Int?
+  timeControl     String?
+  datePlayed      DateTime?
+  createdAt       DateTime  @default(now())
+
+  mistakes        Mistake[]
+
+  @@index([datePlayed])
+}
+
+model Mistake {
+  id                 String   @id @default(cuid())
+  gameId             String
+  game               Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  moveIndex          Int      // Exact position in moves array (0 = start, 1 = after White's 1st move, 2 = after Black's 1st move, etc.)
+  fenPosition        String
+  briefDescription   String
+  primaryTag         String
+  detailedReflection String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([gameId])
+  @@index([primaryTag])
+  @@index([createdAt])
+}
+
+model Insight {
+  id               String   @id @default(cuid())
+  content          String   // JSON array of insight objects
+  mistakesAnalyzed Int
+  mistakeIdsMap    String?  // JSON array of mistake IDs in order (for reference lookups)
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}

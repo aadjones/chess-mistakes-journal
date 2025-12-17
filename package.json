@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "node -e \"const fs=require('fs');let u=process.env.DATABASE_URL||'';if(!u&&fs.existsSync('.env')){const m=fs.readFileSync('.env','utf8').match(/DATABASE_URL=[\\\"']?([^\\\"'\\n]+)/);if(m)u=m[1];}const isLocal=u.startsWith('file:');const schema=isLocal?'prisma/schema.local.prisma':'prisma/schema.prisma';console.log(isLocal?'Local SQLite build':'Production PostgreSQL build');require('child_process').execSync('prisma generate --schema='+schema+' && prisma db push --accept-data-loss --schema='+schema+' && next build',{stdio:'inherit'})\"",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -27,7 +27,7 @@
     "@prisma/client": "^6.18.0",
     "@radix-ui/react-tooltip": "^1.2.8",
     "chess.js": "^1.4.0",
-    "next": "^16.0.1",
+    "next": "16.0.10",
     "react": "^19.2.0",
     "react-chessboard": "^5.8.3",
     "react-dom": "^19.2.0"
